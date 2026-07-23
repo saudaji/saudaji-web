@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editor de contenido — SAUDAJI</title>
+<!-- Editor local del content.json del sitio. 100% cliente: sin servidor, sin login,
+     sin dependencias. Flujo: cargar content.json → editar → descargar el nuevo →
+     reemplazar el archivo en la carpeta del sitio → subir. Instrucciones: GUIA.md -->
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #3c795c;
+    color: #f2efe6;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    padding: 2rem 1rem 6rem;
+  }
+  main { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 13px; letter-spacing: 0.4em; text-transform: uppercase; text-align: center; margin-bottom: 0.5rem; }
+  .sub { text-align: center; font-size: 12px; color: rgba(242,239,230,0.6); margin-bottom: 2rem; }
+  h2 { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(242,239,230,0.6); margin: 2.5rem 0 1rem; }
+  label { display: block; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(242,239,230,0.6); margin: 1rem 0 0.3rem; }
+  input, textarea {
+    width: 100%;
+    background: rgba(0,0,0,0.15);
+    border: 1px solid rgba(242,239,230,0.3);
+    color: #f2efe6;
+    font: inherit;
+    padding: 0.6rem 0.8rem;
+  }
+  input:focus, textarea:focus { outline: none; border-color: #f2efe6; }
+  textarea { min-height: 180px; resize: vertical; }
+  button {
+    background: none;
+    border: 1px solid #f2efe6;
+    color: #f2efe6;
+    font: inherit;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 0.7rem 1.4rem;
+    cursor: pointer;
+  }
+  button:hover { background: #f2efe6; color: #3c795c; }
+  button.chico { padding: 0.3rem 0.7rem; font-size: 10px; }
+  .proyecto {
+    border: 1px solid rgba(242,239,230,0.3);
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  .proyecto .fila-botones { display: flex; gap: 0.5rem; justify-content: flex-end; margin-bottom: 0.5rem; }
+  .acciones { position: fixed; bottom: 0; left: 0; right: 0; background: #2c5944; padding: 1rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .aviso { text-align: center; font-size: 13px; margin-top: 0.6rem; min-height: 1.2em; color: #b9e4c9; }
+  .cover-mini { width: 60px; height: 60px; object-fit: cover; display: block; margin-bottom: 0.5rem; }
+  #zona-carga { border: 1px dashed rgba(242,239,230,0.4); padding: 2rem; text-align: center; margin-bottom: 2rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Editor de contenido</h1>
+  <p class="sub">Edita bio, links y portafolio sin tocar código · los cambios NO se publican solos: descarga y reemplaza content.json (ver GUIA.md)</p>
+
+  <div id="zona-carga">
+    <p style="margin-bottom:1rem">Paso 1 — Carga el <b>content.json</b> actual del sitio:</p>
+    <input type="file" id="archivo" accept=".json" style="width:auto">
+    <p style="margin-top:1rem;font-size:12px;color:rgba(242,239,230,0.6)">o <button class="chico" id="btn-vacio">empezar desde cero</button></p>
+  </div>
+
+  <div id="editor" hidden>
+    <h2>Bio</h2>
+    <label for="bio-titulo">Título de la sección</label>
+    <input id="bio-titulo">
+    <label for="bio-texto">Texto (deja una línea en blanco entre párrafos)</label>
+    <textarea id="bio-texto"></textarea>
+    <label for="bio-foto">Foto (ruta, ej. assets/foto.jpg — opcional)</label>
+    <input id="bio-foto">
+
+    <h2>Links</h2>
+    <div id="links"></div>
+
+    <h2>Portafolio</h2>
+    <div id="lista-proyectos"></div>
+    <button id="btn-agregar">+ agregar proyecto</button>
+  </div>
+</main>
+
+<div class="acciones" id="acciones" hidden>
+  <button id="btn-descargar">⬇ Descargar content.json</button>
+  <div class="aviso" id="aviso"></div>
+</div>
+
+<script>
+(function () {
+  var contenido = null;
+  var CAMPOS_LINK = ['instagram', 'spotify', 'soundcloud', 'bandcamp', 'email'];
+
+  function vacio() {
+    return {
+      bio: { titulo: 'Bio', texto: '', foto: '' },
+      links: { instagram: '', spotify: '', soundcloud: '', bandcamp: '', email: 'saudaji@saudaji.com' },
+      portafolio: []
+    };
+  }
+
+  document.getElementById('archivo').addEventListener('change', function () {
+    var f = this.files[0];
+    if (!f) return;
+    f.text().then(function (txt) {
+      try {
+        contenido = JSON.parse(txt);
+        abrir();
+      } catch (e) {
+        alert('Ese archivo no es un JSON válido. ¿Seguro que elegiste content.json?');
+      }
+    });
+  });
+  document.getElementById('btn-vacio').addEventListener('click', function () {
+    contenido = vacio();
+    abrir();
+  });
+
+  function abrir() {
+    contenido.bio = contenido.bio || vacio().bio;
+    contenido.links = contenido.links || vacio().links;
+    contenido.portafolio = contenido.portafolio || [];
+    document.getElementById('zona-carga').hidden = true;
+    document.getElementById('editor').hidden = false;
+    document.getElementById('acciones').hidden = false;
+    document.getElementById('bio-titulo').value = contenido.bio.titulo || '';
+    document.getElementById('bio-texto').value = contenido.bio.texto || '';
+    document.getElementById('bio-foto').value = contenido.bio.foto || '';
+    pintarLinks();
+    pintarProyectos();
+  }
+
+  function pintarLinks() {
+    var cont = document.getElementById('links');
+    cont.innerHTML = '';
+    CAMPOS_LINK.forEach(function (k) {
+      var l = document.createElement('label');
+      l.textContent = k;
+      var i = document.createElement('input');
+      i.value = contenido.links[k] || '';
+      i.addEventListener('input', function () { contenido.links[k] = i.value.trim(); });
+      cont.append(l, i);
+    });
+  }
+
+  function pintarProyectos() {
+    var lista = document.getElementById('lista-proyectos');
+    lista.innerHTML = '';
+    contenido.portafolio.forEach(function (p, idx) {
+      var caja = document.createElement('div');
+      caja.className = 'proyecto';
+
+      var fila = document.createElement('div');
+      fila.className = 'fila-botones';
+      var subir = document.createElement('button');
+      subir.className = 'chico'; subir.textContent = '↑';
+      subir.title = 'subir en el orden';
+      subir.addEventListener('click', function () {
+        if (idx === 0) return;
+        contenido.portafolio.splice(idx - 1, 0, contenido.portafolio.splice(idx, 1)[0]);
+        pintarProyectos();
+      });
+      var bajar = document.createElement('button');
+      bajar.className = 'chico'; bajar.textContent = '↓';
+      bajar.title = 'bajar en el orden';
+      bajar.addEventListener('click', function () {
+        if (idx === contenido.portafolio.length - 1) return;
+        contenido.portafolio.splice(idx + 1, 0, contenido.portafolio.splice(idx, 1)[0]);
+        pintarProyectos();
+      });
+      var borrar = document.createElement('button');
+      borrar.className = 'chico'; borrar.textContent = '✕ borrar';
+      borrar.addEventListener('click', function () {
+        if (confirm('¿Borrar "' + (p.titulo || 'proyecto sin título') + '"?')) {
+          contenido.portafolio.splice(idx, 1);
+          pintarProyectos();
+        }
+      });
+      fila.append(subir, bajar, borrar);
+      caja.append(fila);
+
+      if (p.cover) {
+        var img = document.createElement('img');
+        img.className = 'cover-mini';
+        img.src = p.cover;
+        caja.append(img);
+      }
+
+      [['titulo', 'Título'], ['artista', 'Artista'], ['rol', 'Rol (ej. Producción · Mezcla)'],
+       ['año', 'Año'], ['cover', 'Portada (ruta o URL de imagen)'], ['link', 'Link (opcional)'],
+       ['descripcion', 'Descripción (opcional)']].forEach(function (par) {
+        var l = document.createElement('label');
+        l.textContent = par[1];
+        var i = document.createElement('input');
+        i.value = p[par[0]] || '';
+        i.addEventListener('input', function () { p[par[0]] = i.value; });
+        caja.append(l, i);
+      });
+      lista.append(caja);
+    });
+  }
+
+  document.getElementById('btn-agregar').addEventListener('click', function () {
+    contenido.portafolio.push({ titulo: '', artista: '', rol: '', 'año': '', cover: '', link: '', descripcion: '' });
+    pintarProyectos();
+    window.scrollTo(0, document.body.scrollHeight);
+  });
+
+  document.getElementById('btn-descargar').addEventListener('click', function () {
+    contenido.bio.titulo = document.getElementById('bio-titulo').value;
+    contenido.bio.texto = document.getElementById('bio-texto').value;
+    contenido.bio.foto = document.getElementById('bio-foto').value.trim();
+    var blob = new Blob([JSON.stringify(contenido, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'content.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    document.getElementById('aviso').textContent = 'Descargado ✓ — ahora reemplaza el content.json de la carpeta del sitio y sube el cambio (GUIA.md)';
+  });
+})();
+</script>
+</body>
+</html>

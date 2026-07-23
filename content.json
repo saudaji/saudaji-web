@@ -1,0 +1,65 @@
+{
+  "_ayuda": "Este archivo es la única fuente de verdad del contenido editable del sitio. Edítalo con admin.html (recomendado) o a mano. Tras editar, reemplaza este archivo y sube el cambio. Guía completa en GUIA.md.",
+
+  "bio": {
+    "titulo": "Bio",
+    "texto": "Saudaji es el proyecto musical de Santiago Tejeda — productor, compositor y diseñador desde Ciudad de México.\n\nHaciendo música desde los 18, mezcla neofolk, alternativo, pop y texturas orgánicas buscando otras formas de producir y componer: canciones que suenan a cuarto, a campo y a máquina al mismo tiempo.\n\nFuera de su proyecto es productor e ingeniero de audio en Sagredo Estudio, su propio estudio, donde ha trabajado con artistas clave de la escena alternativa como Wet Baes, ALONG y Los Milagro. Ha tocado en más de la mitad del país y en Los Ángeles, como parte de la nueva ola del pop independiente mexicano.",
+    "foto": ""
+  },
+
+  "links": {
+    "instagram": "https://www.instagram.com/_saudaji",
+    "spotify": "https://open.spotify.com/album/1wuObFqZETqpSlS1EBWMwU",
+    "soundcloud": "https://soundcloud.com/santiiiiiiiii",
+    "bandcamp": "https://saudaji.bandcamp.com/album/-",
+    "email": "saudaji@saudaji.com"
+  },
+
+  "portafolio": [
+    {
+      "titulo": "BAM BAM ATOM.",
+      "artista": "BAM BAM ATOM.",
+      "rol": "Producción · Mezcla · Composición",
+      "año": "2024",
+      "cover": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/05/fe/5a/05fe5a99-40b6-025a-b900-b82807c8d049/artwork.jpg/600x600bb.jpg",
+      "link": "",
+      "descripcion": ""
+    },
+    {
+      "titulo": "FEEL the GROOVE.",
+      "artista": "BAM BAM ATOM.",
+      "rol": "Producción · Mezcla · Composición",
+      "año": "2024",
+      "cover": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/4c/2f/4e/4c2f4e41-b5a0-8ee3-1f65-19fd3be7b26d/artwork.jpg/600x600bb.jpg",
+      "link": "",
+      "descripcion": ""
+    },
+    {
+      "titulo": "Eternidad",
+      "artista": "Fer Altuzar",
+      "rol": "Producción · Composición",
+      "año": "2024",
+      "cover": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/66/62/89/666289e5-361c-6d18-7f5f-b861cb7ee5b0/0.jpg/600x600bb.jpg",
+      "link": "",
+      "descripcion": ""
+    },
+    {
+      "titulo": "Por Las Buenas — EP",
+      "artista": "Doris Anahí",
+      "rol": "Co-producción con Wet Baes (Por Las Buenas, Let It Die) · Producción (Before I Go) · Composición",
+      "año": "2024",
+      "cover": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/9b/65/70/9b657079-71ef-6bcb-0fa2-3c738c8ca85e/8447053031735.jpg/600x600bb.jpg",
+      "link": "",
+      "descripcion": ""
+    },
+    {
+      "titulo": "MAGAMUNDI",
+      "artista": "ALONG",
+      "rol": "Producción · Mezcla · Composición",
+      "año": "2025",
+      "cover": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/88/68/78/886878a6-2a74-322e-0186-5fe255b40eaf/artwork.jpg/600x600bb.jpg",
+      "link": "",
+      "descripcion": ""
+    }
+  ]
+}
