@@ -5,53 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SAUDAJI</title>
 <meta name="description" content="SAUDAJI — proyecto musical de Santiago Tejeda. Productor, compositor e ingeniero de audio en Ciudad de México.">
-<script>
-/* Fondo dinámico: hue random por carga, S/L fijos derivados del verde de marca #3c795c = hsl(151,34%,36%).
-   Inline en <head> para evitar FOUC. Solo corre en full page load (no hay SPA routing). */
-(function () {
-  var S = 34, L = 36;
-  var prev = parseInt(sessionStorage.getItem('saudaji.bgHue'), 10);
-  var h = Math.floor(Math.random() * 360);
-  // evita repetir un hue a <10° del anterior
-  for (var i = 0; i < 20 && !isNaN(prev) && Math.min(Math.abs(h - prev), 360 - Math.abs(h - prev)) < 10; i++) {
-    h = Math.floor(Math.random() * 360);
-  }
-  sessionStorage.setItem('saudaji.bgHue', h);
-  var root = document.documentElement;
-  root.style.setProperty('--bg-dynamic', 'hsl(' + h + ',' + S + '%,' + L + '%)');
-
-  // luminancia relativa WCAG a partir de HSL
-  function chan(n) {
-    var k = (n + h / 30) % 12;
-    return L / 100 - (S / 100) * Math.min(L / 100, 1 - L / 100) * Math.max(-1, Math.min(k - 3, 9 - k, 1));
-  }
-  function lin(c) { return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
-  var lum = 0.2126 * lin(chan(0)) + 0.7152 * lin(chan(8)) + 0.0722 * lin(chan(4));
-  root.classList.add(lum > 0.35 ? 'dark-text' : 'light-text');
-})();
-</script>
 <style>
+  /* Tema blanco: el fondo es blanco siempre, con un collage de fotos (assets/fuji)
+     que aparece como destello. La única variante de fondo es el "modo espejo"
+     (cámara). Ver #fondo-capa / #collage y el script del collage al final. */
   :root {
-    --verde: #3c795c;
-    --tinta: #f2efe6;
-    --tinta-suave: rgba(242, 239, 230, 0.55);
-    --linea: rgba(242, 239, 230, 0.25);
+    --verde: #3c795c;        /* acento de marca */
+    --tinta: #1a1a1a;        /* texto principal (oscuro sobre blanco) */
+    --tinta-suave: rgba(26, 26, 26, 0.55);
+    --linea: rgba(26, 26, 26, 0.18);
+    --bg: #ffffff;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   html { scroll-behavior: smooth; }
 
-  /* texto oscuro cuando el fondo dinámico resulte claro (calculado en el script del head) */
-  html.dark-text {
-    --tinta: #1e2620;
-    --tinta-suave: rgba(30, 38, 32, 0.6);
-    --linea: rgba(30, 38, 32, 0.28);
-  }
-
   body {
-    /* el color visible vive en #fondo-capa; este es solo respaldo sin JS */
-    background: var(--bg-dynamic, var(--verde));
+    background: var(--bg);
     color: var(--tinta);
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 15px;
@@ -59,14 +30,14 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  ::selection { background: var(--tinta); color: var(--bg-dynamic, var(--verde)); }
+  ::selection { background: var(--tinta); color: #fff; }
 
   /* contenido siempre encima del video de cámara (z-index 0) */
   header, section, footer { position: relative; z-index: 1; }
 
   a { color: var(--tinta); text-decoration: none; }
 
-  /* ---------- header ---------- */
+  /* ---------- header: logo grande centrado + nav debajo ---------- */
   header {
     min-height: 100vh;
     display: flex;
@@ -77,32 +48,28 @@
     padding: 2rem;
   }
 
-  h1 { margin-bottom: 3rem; }
+  h1 { margin: 0 0 2.6rem; }
 
   h1 .logo {
-    width: min(420px, 70vw);
+    width: min(460px, 80vw);
     height: auto;
     display: block;
-    color: var(--tinta);
   }
 
   nav {
     display: flex;
-    gap: 2.5rem;
     flex-wrap: wrap;
+    gap: 1.1rem 2.2rem;
     justify-content: center;
   }
-
   nav a {
-    font-size: 11px;
-    letter-spacing: 0.3em;
+    font-size: 12px;
+    letter-spacing: 0.28em;
     text-transform: uppercase;
     color: var(--tinta-suave);
     transition: color 0.3s;
-    padding-bottom: 2px;
   }
-
-  nav a:hover { color: var(--tinta); }
+  nav a:hover { color: var(--verde); }
 
   /* ---------- secciones ---------- */
   section {
@@ -251,7 +218,7 @@
     transition: background 0.3s, color 0.3s;
   }
 
-  .boton:hover { background: var(--tinta); color: var(--bg-dynamic, var(--verde)); }
+  .boton:hover { background: var(--tinta); color: #fff; }
 
   /* ---------- capa de fondo aislada (color dinámico + cámara) ----------
      isolation: isolate crea un stacking context propio: el mix-blend-mode del
@@ -261,7 +228,7 @@
     inset: 0;
     z-index: 0;
     isolation: isolate;
-    background: var(--bg-dynamic, var(--verde));
+    background: #fff;
     pointer-events: none;
   }
 
@@ -271,18 +238,46 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transform: scaleX(-1);   /* espejo real: te ves como en un espejo */
     /* opacity / filter / mix-blend-mode se aplican desde JS con las constantes
        nombradas al inicio del script de cámara — edítalas ahí, no aquí */
   }
+
+  /* ---------- collage de fotos (assets/fuji) ----------
+     Miniaturas dispersas que cubren la pantalla y aparecen como un destello.
+     Se generan desde JS leyendo assets/fuji/manifest.json. */
+  #collage {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    transition: opacity 0.6s ease;
+  }
+  #collage .foto {
+    position: absolute;
+    object-fit: cover;
+    box-shadow: 0 2px 9px rgba(0, 0, 0, 0.12);
+    opacity: 0;
+    will-change: opacity;
+    transition: opacity 3s ease;        /* fade-out lento al desaparecer */
+  }
+  #collage .foto.vis { opacity: 1; transition: opacity 1s ease; }  /* aparecer más rápido */
+  /* al prender el modo espejo, el collage se desvanece para ver la cámara */
+  #fondo-capa.cam-on #collage { opacity: 0; }
+
+  /* sin velo: las secciones son transparentes, el texto va directo sobre el blanco;
+     las fotos chicas parpadean detrás sin estorbar la lectura */
+  section, header, footer { background: transparent; }
 
   #cam-toggle {
     position: fixed;
     top: 1.2rem;
     right: 1.2rem;
     z-index: 10;
-    background: none;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
     border: 1px solid var(--linea);
-    color: var(--tinta-suave);
+    color: var(--tinta);
     font: inherit;
     font-size: 10px;
     letter-spacing: 0.2em;
@@ -310,7 +305,7 @@
     position: fixed;
     inset: 0;
     z-index: 20;
-    background: var(--bg-dynamic, var(--verde));
+    background: #fff;
     overflow-y: auto;
     padding: 2rem 1rem;
   }
@@ -472,7 +467,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--tinta-suave);
+    color: var(--tinta);
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
     border: 1px solid var(--linea);
     border-radius: 50%;
     font-size: 18px;
@@ -543,7 +541,7 @@
   .fc-estado.ok { color: #b9e4c9; }
   .fc-estado.error { color: #ffb3b3; }
   #form-contacto .boton { display: block; margin: 0.5rem auto 0; background: none; color: var(--tinta); cursor: pointer; font-family: inherit; }
-  #form-contacto .boton:hover { background: var(--tinta); color: var(--bg-dynamic, var(--verde)); }
+  #form-contacto .boton:hover { background: var(--tinta); color: #fff; }
 
   footer {
     text-align: center;
@@ -563,14 +561,12 @@
 </head>
 <body>
 
-<!-- capa aislada: color dinámico + video de cámara (ver CSS #fondo-capa) -->
+<!-- capa de fondo: blanco siempre + video de cámara en modo espejo -->
 <div id="fondo-capa" aria-hidden="true"></div>
 
 <header>
   <h1>
-    <svg class="logo" viewBox="0 0 784 283" role="img" aria-label="Saudaji" xmlns="http://www.w3.org/2000/svg">
-<path fill="currentColor" fill-rule="evenodd" d="M 181.3,266.2 C 214.2,234.2 218.3,229.5 223.9,218.5 C 226.7,213.0 229.0,207.9 229.0,207.2 C 229.0,206.5 229.8,204.7 230.7,203.3 C 232.1,201.2 232.6,197.9 232.9,189.4 L 233.2,178.3 L 228.7,168.9 C 225.0,161.3 222.7,158.1 216.8,152.4 C 212.8,148.4 207.9,144.4 206.0,143.4 C 204.1,142.5 201.4,140.9 200.0,140.0 C 198.6,139.0 190.8,134.3 182.5,129.5 C 163.4,118.4 163.0,118.0 163.0,111.6 L 163.0,106.5 L 182.7,87.2 C 193.6,76.6 203.8,67.2 205.5,66.3 C 209.3,64.4 227.7,46.4 229.6,42.7 C 230.4,41.2 230.8,39.5 230.5,39.0 C 230.1,38.4 202.3,38.0 155.0,38.0 L 80.0,38.0 L 65.8,51.4 C 47.9,68.2 10.0,106.4 7.2,110.7 C 6.0,112.4 5.0,114.3 5.0,114.9 C 5.0,115.6 4.0,117.4 2.9,119.0 C 0.9,121.6 0.8,122.3 1.9,126.4 C 2.5,128.9 3.0,133.4 3.0,136.5 C 3.0,144.7 5.6,149.2 16.2,159.7 C 23.7,167.1 27.4,169.8 35.5,174.1 C 41.0,177.0 47.2,180.4 49.2,181.7 C 51.3,182.9 53.3,184.0 53.7,184.0 C 54.0,184.0 55.1,184.6 55.9,185.4 C 56.8,186.2 60.6,188.4 64.5,190.5 C 75.4,196.2 77.0,198.1 77.0,205.5 L 77.0,211.6 L 46.0,242.6 C 18.2,270.4 15.0,273.9 15.0,276.8 C 15.0,279.5 14.6,280.0 12.5,280.0 C 11.1,280.0 10.0,280.4 10.0,281.0 C 10.0,281.7 36.5,282.0 87.6,282.0 L 165.1,282.0 L 181.3,266.2 Z M 709.8,198.8 C 718.4,194.5 729.0,183.4 729.0,178.7 C 729.0,177.0 729.9,174.0 731.0,172.2 C 732.9,169.1 733.0,167.2 733.0,110.1 C 733.0,57.3 732.8,51.2 731.4,50.6 C 730.5,50.3 723.0,50.0 714.6,50.0 C 699.8,50.0 699.2,50.1 696.7,52.4 C 693.1,55.7 692.8,57.7 693.5,73.1 C 694.4,95.2 695.2,155.3 694.5,158.6 C 694.2,160.3 692.4,163.5 690.4,165.8 C 687.1,169.7 686.5,170.0 681.6,170.0 C 677.2,170.0 675.8,170.5 673.6,172.6 C 671.1,175.2 671.0,175.6 671.0,187.6 C 671.0,198.3 671.2,200.0 672.8,200.9 C 673.7,201.5 681.0,202.0 688.9,202.0 C 703.2,202.0 703.4,202.0 709.8,198.8 Z M 281.4,157.3 C 286.4,155.8 289.0,155.4 290.7,156.1 C 292.1,156.6 301.4,157.0 311.5,157.0 C 327.2,157.0 329.9,156.8 330.4,155.4 C 331.5,152.6 331.1,94.2 330.0,93.5 C 329.4,93.2 329.0,91.8 329.0,90.4 C 329.0,89.0 328.1,86.0 327.0,83.8 C 325.9,81.5 325.0,79.1 325.0,78.5 C 325.0,77.1 319.6,69.5 315.1,64.6 C 310.4,59.6 302.6,53.8 297.5,51.6 C 295.3,50.6 291.9,49.1 290.0,48.2 C 287.6,47.1 282.6,46.5 273.8,46.2 C 262.2,45.8 260.7,46.0 257.4,47.9 C 255.5,49.1 252.7,50.0 251.3,50.0 C 249.8,50.0 246.4,51.7 243.3,54.2 C 235.6,60.1 220.0,76.9 218.3,81.0 C 217.5,82.9 216.1,86.1 215.2,88.0 C 213.2,92.2 212.7,113.7 214.6,116.1 C 215.2,116.9 216.2,119.6 216.9,122.2 C 217.5,124.8 218.9,128.4 220.0,130.2 C 221.1,132.0 222.4,134.5 222.9,135.7 C 223.5,136.9 226.7,140.8 230.2,144.3 C 244.1,158.3 262.5,163.0 281.4,157.3 Z M 394.6,157.7 C 397.9,156.9 401.6,155.7 402.8,155.1 C 404.5,154.2 405.6,154.3 407.9,155.5 C 410.3,156.7 414.6,157.0 428.0,157.0 L 445.0,157.0 L 444.8,103.8 L 444.5,50.5 L 428.5,50.2 C 417.2,50.0 411.8,50.3 410.2,51.2 C 405.3,53.8 405.0,55.8 405.0,86.7 L 405.0,115.4 L 401.8,118.7 C 398.8,121.8 398.2,122.0 391.8,122.0 C 385.4,122.0 384.8,121.8 381.0,118.4 L 377.0,114.8 L 376.8,82.6 L 376.5,50.5 L 360.8,50.2 L 345.1,49.9 L 341.0,54.0 L 336.9,58.1 L 337.4,73.3 C 337.7,81.7 338.3,98.4 338.7,110.5 C 339.6,135.9 340.0,137.3 349.7,147.1 C 361.1,158.8 375.9,162.3 394.6,157.7 Z M 521.8,158.1 C 526.1,157.1 530.5,155.8 531.6,155.2 C 532.6,154.7 534.6,153.7 536.0,153.1 C 543.1,149.8 546.0,147.7 551.2,142.2 C 554.4,138.9 557.0,135.6 557.0,134.8 C 557.0,134.1 557.9,132.4 559.0,131.0 C 560.1,129.6 561.0,127.9 561.0,127.2 C 561.0,126.4 561.9,124.6 562.9,123.1 C 564.0,121.6 565.0,118.6 565.2,116.5 C 565.4,113.7 566.0,112.4 567.2,112.2 C 568.5,112.0 569.0,112.5 569.0,113.9 C 569.0,115.1 569.4,116.8 570.0,117.8 C 570.5,118.7 571.9,121.8 573.0,124.5 C 577.3,134.6 578.1,135.8 584.4,142.7 C 591.4,150.2 599.9,155.5 609.9,158.4 C 615.8,160.1 628.5,160.6 629.4,159.1 C 629.8,158.6 631.8,157.9 633.9,157.5 C 636.1,157.1 638.4,156.2 639.1,155.4 C 640.6,153.5 645.4,153.6 647.0,155.5 C 648.1,156.8 651.3,157.0 667.4,156.8 L 686.5,156.5 L 686.4,127.5 C 686.4,111.5 685.9,96.2 685.4,93.5 C 684.8,90.8 682.5,84.7 680.2,80.0 C 676.9,73.2 674.5,69.9 667.8,63.4 C 654.6,50.4 644.5,46.0 627.5,46.0 C 618.3,46.0 616.0,46.3 613.2,48.0 C 611.4,49.1 608.8,50.0 607.4,50.0 C 603.6,50.0 597.6,54.6 586.3,66.3 C 576.5,76.4 575.4,78.1 574.8,84.3 C 574.6,85.8 574.0,87.1 573.5,87.1 C 571.0,87.3 569.0,89.3 569.0,91.5 C 569.0,92.9 568.5,94.0 568.0,94.0 C 567.4,94.0 567.0,81.9 567.0,59.6 C 567.0,28.0 566.5,21.7 564.5,25.0 C 564.1,25.6 556.9,26.0 545.4,26.0 L 527.0,26.0 L 527.0,38.0 C 527.0,52.2 526.8,52.4 518.4,48.6 C 511.0,45.2 498.3,44.9 493.2,48.0 C 491.4,49.1 488.8,50.0 487.4,50.0 C 486.0,50.0 483.4,51.0 481.7,52.1 C 475.5,56.3 459.8,72.6 457.4,77.2 C 456.1,79.8 454.6,82.1 454.0,82.5 C 453.5,82.8 453.2,84.1 453.5,85.3 C 453.9,86.9 453.5,87.8 451.8,88.5 C 449.6,89.5 449.5,90.1 449.2,101.4 C 449.0,108.7 449.3,113.7 450.0,114.4 C 450.5,114.9 451.0,116.1 451.0,116.9 C 451.0,118.3 455.7,128.4 458.3,132.5 C 461.4,137.5 468.7,145.5 473.4,148.9 C 479.5,153.4 483.3,155.2 492.0,157.5 C 495.6,158.5 498.9,159.4 499.5,159.5 C 502.7,160.5 515.0,159.7 521.8,158.1 Z M 780.6,154.7 L 783.1,151.8 L 782.8,101.4 C 782.5,57.8 782.3,50.8 781.0,50.0 C 780.2,49.5 771.8,49.0 762.4,49.0 C 748.5,49.0 745.0,49.3 744.0,50.5 C 742.3,52.5 742.5,154.7 744.2,156.8 C 745.1,157.8 748.9,158.1 761.8,157.8 L 778.2,157.5 L 780.6,154.7 Z M 500.9,119.9 C 498.9,118.9 495.4,115.9 493.1,113.3 C 489.6,109.1 489.0,107.9 489.0,103.8 C 489.0,99.3 489.3,98.7 495.5,92.5 L 502.0,86.0 L 509.2,86.0 L 516.4,86.0 L 520.7,90.6 L 525.0,95.3 L 525.0,103.3 L 525.0,111.3 L 519.7,116.7 C 514.6,121.7 514.0,122.0 509.4,121.9 C 506.7,121.8 502.9,121.0 500.9,119.9 Z M 619.6,120.3 C 618.1,119.5 615.0,117.0 612.9,114.8 C 609.3,111.1 609.0,110.3 609.0,105.1 C 609.0,98.4 610.8,95.4 615.2,94.2 C 617.5,93.6 618.6,92.6 619.1,90.5 C 620.2,86.7 621.5,86.0 628.5,86.0 C 634.4,86.0 634.4,86.0 639.7,91.6 L 645.0,97.2 L 645.0,104.2 L 645.0,111.3 L 639.7,116.7 C 634.4,122.0 634.3,122.0 628.4,121.9 C 625.2,121.8 621.2,121.1 619.6,120.3 Z M 259.4,115.6 C 255.0,111.3 255.0,111.2 255.0,104.0 L 255.0,96.7 L 260.3,91.3 L 265.7,86.0 L 272.7,86.0 C 278.3,86.0 280.3,86.4 282.4,88.1 C 286.6,91.4 289.0,97.5 289.0,104.9 C 289.0,111.3 289.0,111.4 284.4,115.7 L 279.7,120.0 L 271.7,120.0 L 263.7,120.0 L 259.4,115.6 Z M 724.0,37.5 C 726.3,35.6 728.5,34.0 728.9,34.0 C 729.3,34.0 730.3,32.7 731.3,31.1 C 732.5,29.1 733.0,26.0 733.0,20.8 C 733.0,14.4 732.6,12.8 730.1,8.9 C 726.3,2.8 722.2,1.0 712.5,1.0 L 704.8,1.0 L 698.8,7.0 L 692.8,13.0 L 693.2,21.0 C 693.5,28.6 693.7,29.1 697.3,32.8 C 702.6,38.2 708.4,41.0 714.7,41.0 C 719.1,41.0 720.4,40.5 724.0,37.5 Z"/>
-</svg>
+    <img class="logo" src="assets/logo.svg" alt="Saudaji">
   </h1>
   <nav>
     <a href="#bio">Bio</a>
@@ -755,9 +751,9 @@
    El stream nunca sale del cliente: no se graba, no se sube, no se persiste. */
 (function () {
   /* ===== valores ajustables — edita aquí, no en la lógica ===== */
-  var CAMERA_OPACITY = 0.22;   // 0 = invisible, 1 = cámara cruda sin mezclar. Súbele si se siente demasiado sutil.
-  var CAMERA_FILTER = 'grayscale(0.4) contrast(1.1)'; // tratamiento visual del video
-  var CAMERA_BLEND = 'overlay'; // 'overlay' o 'screen': cómo se funde con --bg-dynamic
+  var CAMERA_OPACITY = 0.75;   // 0 = invisible, 1 = cámara cruda. Alto para verse como espejo sobre blanco.
+  var CAMERA_FILTER = 'grayscale(0.25) contrast(1.05)'; // tratamiento visual del video
+  var CAMERA_BLEND = 'normal'; // 'normal' se ve directo; 'multiply' lo integra al blanco
   var CAMERA_RES = { width: { ideal: 1280 }, height: { ideal: 720 } }; // bajarla ahorra batería
   /* ============================================================ */
 
@@ -773,6 +769,7 @@
   function apagar() {
     if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; }
     if (video) { video.remove(); video = null; }
+    capa.classList.remove('cam-on');   // vuelve a mostrar el collage
     btn.classList.remove('on');
     btn.setAttribute('aria-pressed', 'false');
     btn.textContent = 'Modo espejo';
@@ -791,6 +788,7 @@
       video.style.mixBlendMode = CAMERA_BLEND;
       video.srcObject = s;
       capa.append(video);
+      capa.classList.add('cam-on');   // desvanece el collage para ver la cámara
       btn.classList.add('on');
       btn.setAttribute('aria-pressed', 'true');
       btn.textContent = 'Cámara activa — apagar';
@@ -802,6 +800,57 @@
     });
   });
   window.addEventListener('pagehide', apagar);
+})();
+
+/* ---------- canvas de fotos (fondo blanco) ----------
+   Lee assets/fuji/manifest.json y mantiene POCAS fotos a la vez que aparecen y
+   desaparecen constantemente en posiciones al azar, dejando mucho espacio blanco.
+   Nunca es un collage fijo: es un canvas vivo que se recompone solo. */
+(function () {
+  /* ===== valores ajustables ===== */
+  var VISIBLES = window.innerWidth < 700 ? 9 : 16; // cuántas fotos a la vez (pocas = mucho blanco)
+  var VIDA_MIN = 2600, VIDA_MAX = 6500;            // ms que dura visible cada foto
+  var FADE = 3000;                                 // ms del fade-out (coincide con el CSS)
+  var TAM_MIN = 42, TAM_MAX = 104;                 // px de ancho (fotos chicas)
+  /* ============================== */
+
+  var cont = document.getElementById('collage');
+  if (!cont) return;
+  var rnd = function (a, b) { return a + Math.random() * (b - a); };
+  var fotos = [];
+
+  function spawn() {
+    if (!fotos.length) return;
+    var nombre = fotos[Math.floor(Math.random() * fotos.length)];
+    var img = document.createElement('img');
+    img.className = 'foto';
+    img.src = 'assets/fuji/' + nombre;
+    img.alt = '';
+    img.decoding = 'async';
+    img.style.width = rnd(TAM_MIN, TAM_MAX).toFixed(0) + 'px';
+    img.style.left = rnd(1, 90).toFixed(2) + '%';
+    img.style.top = rnd(1, 88).toFixed(2) + '%';
+    img.style.transform = 'rotate(' + rnd(-7, 7).toFixed(1) + 'deg)';
+    cont.appendChild(img);
+    // dos rAF para asegurar la transición de opacidad al aparecer
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { img.classList.add('vis'); });
+    });
+    setTimeout(function () {
+      img.classList.remove('vis');                 // se desvanece
+      setTimeout(function () { img.remove(); spawn(); }, FADE + 60); // y se reemplaza por otra
+    }, rnd(VIDA_MIN, VIDA_MAX));
+  }
+
+  fetch('assets/fuji/manifest.json').then(function (r) {
+    if (!r.ok) throw 0;
+    return r.json();
+  }).then(function (list) {
+    fotos = list;
+    for (var i = 0; i < VISIBLES; i++) setTimeout(spawn, rnd(0, 2600)); // arranque escalonado
+  }).catch(function () {
+    console.info('[collage] no se cargó assets/fuji/manifest.json — fondo blanco');
+  });
 })();
 
 /* ---------- FASE 3: hub de juegos (carga perezosa) ---------- */
@@ -848,7 +897,7 @@
    directo por file://, donde el navegador bloquea fetch local), el HTML de
    respaldo que ya está en la página se queda tal cual: el sitio nunca queda vacío. */
 (function () {
-  fetch('content.json').then(function (r) {
+  fetch('content.json', { cache: 'no-store' }).then(function (r) {
     if (!r.ok) throw 0;
     return r.json();
   }).then(function (c) {

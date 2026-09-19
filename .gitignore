@@ -1,2 +1,10 @@
+# macOS
 .DS_Store
-*.log
+
+# Fotos de prensa originales (pesadas, solo para generar el PDF localmente).
+# El sitio no las sirve y el PDF ya está generado (saudaji-presskit.pdf).
+assets/fotos/
+
+# Python
+__pycache__/
+*.pyc

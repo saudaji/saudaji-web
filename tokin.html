@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAUDAJI — Tokín</title>
+<meta name="description" content="Pre-regístrate al próximo tokín de Saudaji. Entérate primero: fecha, lugar y boletos.">
+<style>
+  /* Página aparte para el pre-registro de un tokín (no es parte de index.html).
+     Junta correos vía Formspree para armar el mailing list. Mismo look que el sitio:
+     blanco + canvas de fotos que parpadean. Datos del evento salen de content.json. */
+  :root {
+    --verde: #3c795c;
+    --tinta: #1a1a1a;
+    --tinta-suave: rgba(26, 26, 26, 0.55);
+    --linea: rgba(26, 26, 26, 0.18);
+    --bg: #ffffff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--tinta);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  /* canvas de fotos detrás */
+  #fondo-capa { position: fixed; inset: 0; z-index: 0; background: var(--bg); pointer-events: none; overflow: hidden; }
+  #collage { position: absolute; inset: 0; }
+  #collage .foto {
+    position: absolute;
+    object-fit: cover;
+    box-shadow: 0 2px 9px rgba(0, 0, 0, 0.12);
+    opacity: 0;
+    will-change: opacity;
+    transition: opacity 3s ease;
+  }
+  #collage .foto.vis { opacity: 1; transition: opacity 1s ease; }
+
+  /* logo arriba-izquierda, vuelve al sitio */
+  .home { position: fixed; top: 1.6rem; left: 2rem; z-index: 3; }
+  .home img { width: 150px; height: auto; display: block; filter: drop-shadow(0 0 12px #fff) drop-shadow(0 0 24px #fff); }
+
+  main {
+    position: relative;
+    z-index: 2;
+    max-width: 440px;
+    margin: 0 auto;
+    padding: 8rem 1.5rem 4rem;
+    text-align: center;
+  }
+  .kicker {
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--tinta-suave);
+    margin-bottom: 1rem;
+    text-shadow: 0 0 6px #fff, 0 0 6px #fff;
+  }
+  h1 {
+    font-size: clamp(30px, 8vw, 46px);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.05;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 8px #fff, 0 0 8px #fff, 0 0 16px #fff;
+  }
+  .detalle {
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    color: var(--verde);
+    font-weight: 600;
+    margin-bottom: 1.2rem;
+    text-shadow: 0 0 6px #fff, 0 0 6px #fff;
+  }
+  .detalle:empty { display: none; }
+  .texto {
+    font-weight: 300;
+    max-width: 380px;
+    margin: 0 auto 2.4rem;
+    text-shadow: 0 0 6px #fff, 0 0 8px #fff;
+  }
+
+  /* formulario */
+  form { text-align: left; }
+  .campo { margin-bottom: 1rem; }
+  .campo label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--tinta-suave);
+    margin-bottom: 0.35rem;
+    text-shadow: 0 0 6px #fff;
+  }
+  .campo input {
+    width: 100%;
+    background: #fff;
+    border: 1px solid var(--linea);
+    color: var(--tinta);
+    font: inherit;
+    font-size: 15px;
+    padding: 0.75rem 0.85rem;
+  }
+  .campo input:focus { outline: none; border-color: var(--tinta); }
+  .campo input.error { border-color: #d92b2b; }
+  .trampa { position: absolute; left: -9999px; opacity: 0; pointer-events: none; }
+  .estado { min-height: 1.4em; font-size: 13px; text-align: center; margin: 0.4rem 0; text-shadow: 0 0 6px #fff; }
+  .estado.ok { color: var(--verde); font-weight: 600; }
+  .estado.error { color: #c0392b; }
+  button {
+    display: block;
+    width: 100%;
+    background: var(--tinta);
+    color: #fff;
+    border: 1px solid var(--tinta);
+    font: inherit;
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    padding: 1rem;
+    margin-top: 0.6rem;
+    cursor: pointer;
+    transition: background 0.25s, color 0.25s;
+  }
+  button:hover { background: #fff; color: var(--tinta); }
+  .nota {
+    font-size: 11px;
+    color: var(--tinta-suave);
+    margin-top: 1.6rem;
+    text-shadow: 0 0 6px #fff;
+  }
+  .volver {
+    display: inline-block;
+    margin-top: 2.5rem;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--tinta-suave);
+    border-bottom: 1px solid var(--linea);
+    text-shadow: 0 0 6px #fff;
+  }
+  .volver:hover { color: var(--tinta); border-color: var(--tinta); }
+
+  /* estado de éxito: oculta el form y muestra un gracias */
+  .gracias { display: none; }
+  body.enviado form, body.enviado .texto { display: none; }
+  body.enviado .gracias { display: block; font-size: 17px; font-weight: 300; margin: 1rem auto 0; max-width: 360px; text-shadow: 0 0 8px #fff, 0 0 8px #fff; }
+
+  @media (max-width: 600px) {
+    .home { left: 1.2rem; top: 1.2rem; }
+    .home img { width: 120px; }
+    main { padding: 6.5rem 1.4rem 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<div id="fondo-capa" aria-hidden="true"><div id="collage"></div></div>
+
+<a class="home" href="index.html" aria-label="Volver a saudaji.com"><img src="assets/logo.svg" alt="Saudaji"></a>
+
+<main>
+  <p class="kicker">Pre-registro</p>
+  <h1 id="ev-titulo">Próximo tokín</h1>
+  <p class="detalle" id="ev-detalle"></p>
+  <p class="texto" id="ev-texto">Apúntate y entérate primero: fecha, lugar, boletos y acceso.</p>
+
+  <!-- Formspree para el mailing list. Pasos para activarlo:
+       1. Crea una cuenta gratis en formspree.io con saudaji@saudaji.com.
+       2. Crea un form NUEVO (aparte del de contacto) y copia su ID.
+       3. Reemplaza TU_ID_MAILING_AQUI abajo por ese ID.
+       Con eso, cada pre-registro llega a tu panel de Formspree y puedes exportar
+       todos los correos (CSV) para tu mailing list. Mientras siga el placeholder,
+       usa el fallback mailto (abre el correo del visitante) y funciona igual. -->
+  <form id="form-tokin" action="https://formspree.io/f/TU_ID_MAILING_AQUI" method="POST" novalidate>
+    <div class="campo">
+      <label for="t-nombre">Nombre *</label>
+      <input id="t-nombre" name="nombre" type="text" required autocomplete="name">
+    </div>
+    <div class="campo">
+      <label for="t-email">Correo *</label>
+      <input id="t-email" name="email" type="email" required autocomplete="email" inputmode="email">
+    </div>
+    <div class="campo">
+      <label for="t-ciudad">Ciudad (opcional)</label>
+      <input id="t-ciudad" name="ciudad" type="text" autocomplete="address-level2">
+    </div>
+    <input class="trampa" type="text" name="sitio_web" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <input type="hidden" name="_subject" value="Nuevo pre-registro — tokín">
+    <p class="estado" role="status" aria-live="polite"></p>
+    <button type="submit">Apúntame</button>
+  </form>
+
+  <div class="gracias">¡Listo! Ya estás en la lista — te aviso primero del tokín. 🌿</div>
+
+  <p class="nota">Tus datos solo se usan para avisarte de este proyecto. Cero spam.</p>
+  <a class="volver" href="index.html">← saudaji.com</a>
+</main>
+
+<script>
+/* ---------- canvas de fotos (igual que el sitio, más discreto) ---------- */
+(function () {
+  var VISIBLES = window.innerWidth < 700 ? 5 : 10;
+  var VIDA_MIN = 2800, VIDA_MAX = 6500, FADE = 3000, TAM_MIN = 42, TAM_MAX = 100;
+  var cont = document.getElementById('collage');
+  if (!cont) return;
+  var rnd = function (a, b) { return a + Math.random() * (b - a); };
+  var fotos = [];
+  function spawn() {
+    if (!fotos.length) return;
+    var img = document.createElement('img');
+    img.className = 'foto';
+    img.src = 'assets/fuji/' + fotos[Math.floor(Math.random() * fotos.length)];
+    img.alt = ''; img.decoding = 'async';
+    img.style.width = rnd(TAM_MIN, TAM_MAX).toFixed(0) + 'px';
+    img.style.left = rnd(1, 90).toFixed(2) + '%';
+    img.style.top = rnd(1, 90).toFixed(2) + '%';
+    img.style.transform = 'rotate(' + rnd(-7, 7).toFixed(1) + 'deg)';
+    cont.appendChild(img);
+    requestAnimationFrame(function () { requestAnimationFrame(function () { img.classList.add('vis'); }); });
+    setTimeout(function () {
+      img.classList.remove('vis');
+      setTimeout(function () { img.remove(); spawn(); }, FADE + 60);
+    }, rnd(VIDA_MIN, VIDA_MAX));
+  }
+  fetch('assets/fuji/manifest.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); })
+    .then(function (l) { fotos = l; for (var i = 0; i < VISIBLES; i++) setTimeout(spawn, rnd(0, 2600)); })
+    .catch(function () {});
+})();
+
+/* ---------- datos del evento desde content.json ---------- */
+var EMAIL = 'saudaji@saudaji.com';
+(function () {
+  fetch('content.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (c) {
+    if (c.links && c.links.email) EMAIL = c.links.email;
+    var e = c.evento || {};
+    if (e.titulo) document.getElementById('ev-titulo').textContent = e.titulo;
+    if (e.texto) document.getElementById('ev-texto').textContent = e.texto;
+    if (e.cta) document.querySelector('#form-tokin button').textContent = e.cta;
+    var det = [e.fecha, e.lugar].filter(Boolean).join('  ·  ');
+    document.getElementById('ev-detalle').textContent = det;
+    if (e.titulo) document.title = 'SAUDAJI — ' + e.titulo;
+  }).catch(function () {});
+})();
+
+/* ---------- envío: Formspree si está configurado, si no mailto ---------- */
+(function () {
+  var form = document.getElementById('form-tokin');
+  var estado = form.querySelector('.estado');
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    estado.className = 'estado'; estado.textContent = '';
+    if (form.querySelector('.trampa').value) return;             // honeypot
+    var nombre = document.getElementById('t-nombre');
+    var email = document.getElementById('t-email');
+    nombre.classList.remove('error'); email.classList.remove('error');
+    var ok = true;
+    if (!nombre.value.trim()) { nombre.classList.add('error'); ok = false; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.value.trim())) { email.classList.add('error'); ok = false; }
+    if (!ok) { estado.className = 'estado error'; estado.textContent = 'Revisa nombre y correo.'; return; }
+
+    var datos = {
+      nombre: nombre.value.trim(),
+      email: email.value.trim(),
+      ciudad: (document.getElementById('t-ciudad').value.trim() || '—')
+    };
+    var configurado = form.action.indexOf('TU_ID_MAILING_AQUI') === -1;
+    if (configurado) {
+      estado.textContent = 'Enviando…';
+      fetch(form.action, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify(datos)
+      }).then(function (r) {
+        if (r.ok) { document.body.classList.add('enviado'); }
+        else { throw 0; }
+      }).catch(function () {
+        estado.className = 'estado error';
+        estado.textContent = 'No se pudo enviar. Escríbeme a ' + EMAIL;
+      });
+    } else {
+      var cuerpo = 'Quiero pre-registrarme al tokín.\n\nNombre: ' + datos.nombre +
+        '\nCorreo: ' + datos.email + '\nCiudad: ' + datos.ciudad;
+      window.location.href = 'mailto:' + EMAIL + '?subject=' +
+        encodeURIComponent('Pre-registro tokín — ' + datos.nombre) + '&body=' + encodeURIComponent(cuerpo);
+      document.body.classList.add('enviado');
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,28 +1,69 @@
 {
   "_ayuda": "Este archivo es la única fuente de verdad del contenido editable del sitio. Edítalo con admin.html (recomendado) o a mano. Tras editar, reemplaza este archivo y sube el cambio. Guía completa en GUIA.md.",
-
   "bio": {
     "titulo": "Bio",
-    "texto": "Saudaji es el proyecto musical de Santiago Tejeda — productor, compositor y diseñador desde Ciudad de México.\n\nHaciendo música desde los 18, mezcla neofolk, alternativo, pop y texturas orgánicas buscando otras formas de producir y componer: canciones que suenan a cuarto, a campo y a máquina al mismo tiempo.\n\nFuera de su proyecto es productor e ingeniero de audio en Sagredo Estudio, su propio estudio, donde ha trabajado con artistas clave de la escena alternativa como Wet Baes, ALONG y Los Milagro. Ha tocado en más de la mitad del país y en Los Ángeles, como parte de la nueva ola del pop independiente mexicano.",
+    "texto": "Saudaji es el proyecto solista de Santiago Tejeda — productor, compositor, ingeniero de audio y diseñador con base en Ciudad de México. Hace música desde los 18 años y se mueve entre el neofolk, el pop alternativo y las texturas orgánicas, buscando siempre otras formas de producir y componer: canciones que suenan a cuarto, a campo y a máquina al mismo tiempo.\n\nComo solista ha publicado los EPs «tormenta, Callada» (2024) y «☼ ☞ ☺» (2025), además del sencillo «RUIDO» (2025), todos producidos, grabados y mezclados por él mismo bajo una ética DIY. Su música retrata la ansiedad y la belleza de lo cotidiano con un enfoque honesto y artesanal.\n\nFuera de su proyecto es productor e ingeniero de audio, y socio y dueño de Sagredo Estudio, donde ha colaborado con artistas clave de la escena alternativa mexicana como Wet Baes, ALONG y Los Milagro. Ha tocado en más de la mitad del país y en Los Ángeles, consolidándose como parte de la nueva ola del pop independiente mexicano.",
     "foto": ""
+  },
+  "highlights": [
+    "Productor, compositor e ingeniero de audio. Socio y dueño de Sagredo Estudio en CDMX.",
+    "Shows y colaboraciones con Los Milagro, ALONG, Wet Baes, Daniel Quién y BAM BAM ATOM., entre otros.",
+    "Grabaciones con ALONG, Ivana, Doris Anahí, Rafa Arreguín, Fer Altuzar, Ahora Juntos, Disco Bahía y Enzo Marcelo, entre otros.",
+    "Producciones para ALONG, Fer Altuzar, BAM BAM ATOM., Doris Anahí y Ramona Vee, entre otros.",
+    "Presencia en Ibero 90.9 · presentaciones en México y Los Ángeles."
+  ],
+  "musica": [
+    {
+      "titulo": "☼ ☞ ☺",
+      "formato": "EP",
+      "año": "2025",
+      "escuchar": "https://distrokid.com/hyperfollow/saudaji1/--",
+      "link": "https://open.spotify.com/album/1kG111eh5jam65UXGxneAT",
+      "cover": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/01/46/ee/0146ee01-641f-b907-bace-95bb861fb210/artwork.jpg/600x600bb.jpg"
+    },
+    {
+      "titulo": "RUIDO",
+      "formato": "Sencillo",
+      "año": "2025",
+      "escuchar": "https://music.youtube.com/playlist?list=OLAK5uy_m26mTlYcCFb9bCmwH3PIyiqRVGtEKbae4",
+      "link": "https://open.spotify.com/album/1wuObFqZETqpSlS1EBWMwU",
+      "cover": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/b9/50/f9/b950f9e6-a9b9-0803-2dea-2112aa4910eb/artwork.jpg/600x600bb.jpg"
+    },
+    {
+      "titulo": "tormenta, Callada",
+      "formato": "EP",
+      "año": "2024",
+      "escuchar": "https://music.youtube.com/playlist?list=OLAK5uy_kHud9VU39s14ErTsns1RsWyjXz8HHqM-w",
+      "link": "https://open.spotify.com/album/1RJ6oxpf6dLtcOiRllG1Wu",
+      "cover": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/18/13/78/18137857-40e9-309b-9fe1-6e546b8c588a/artwork.jpg/600x600bb.jpg"
+    }
+  ],
+  "evento": {
+    "titulo": "Próximo tokín",
+    "fecha": "",
+    "lugar": "",
+    "texto": "Apúntate al pre-registro y entérate primero: fecha, lugar, boletos y acceso. Sin spam, solo lo importante.",
+    "cta": "Apúntame"
   },
 
   "links": {
     "instagram": "https://www.instagram.com/_saudaji",
+    "x": "https://x.com/saudaji_",
+    "tiktok": "https://www.tiktok.com/@saudaji_",
     "spotify": "https://open.spotify.com/album/1wuObFqZETqpSlS1EBWMwU",
     "soundcloud": "https://soundcloud.com/santiiiiiiiii",
     "bandcamp": "https://saudaji.bandcamp.com/album/-",
+    "web": "https://saudaji.com",
     "email": "saudaji@saudaji.com"
   },
-
   "portafolio": [
     {
       "titulo": "BAM BAM ATOM.",
       "artista": "BAM BAM ATOM.",
-      "rol": "Producción · Mezcla · Composición",
-      "año": "2024",
+      "rol": "Producción · Composición",
+      "año": "2023",
       "cover": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/05/fe/5a/05fe5a99-40b6-025a-b900-b82807c8d049/artwork.jpg/600x600bb.jpg",
-      "link": "",
+      "link": "https://music.apple.com/us/album/bam-bam-atom-ep/1687196212",
       "descripcion": ""
     },
     {
@@ -31,33 +72,51 @@
       "rol": "Producción · Mezcla · Composición",
       "año": "2024",
       "cover": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/4c/2f/4e/4c2f4e41-b5a0-8ee3-1f65-19fd3be7b26d/artwork.jpg/600x600bb.jpg",
-      "link": "",
+      "link": "https://music.apple.com/us/album/feel-the-groove-single/1721766961",
       "descripcion": ""
     },
     {
       "titulo": "Eternidad",
       "artista": "Fer Altuzar",
       "rol": "Producción · Composición",
-      "año": "2024",
+      "año": "2025",
       "cover": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/66/62/89/666289e5-361c-6d18-7f5f-b861cb7ee5b0/0.jpg/600x600bb.jpg",
-      "link": "",
+      "link": "https://music.apple.com/us/album/eternidad-single/1837010916",
       "descripcion": ""
     },
     {
       "titulo": "Por Las Buenas — EP",
       "artista": "Doris Anahí",
-      "rol": "Co-producción con Wet Baes (Por Las Buenas, Let It Die) · Producción (Before I Go) · Composición",
-      "año": "2024",
+      "rol": "Co-producción con Wet Baes (Por Las Buenas, Let It Die) · Producción (Before I Go) · Composición en los tres temas",
+      "año": "2023",
       "cover": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/9b/65/70/9b657079-71ef-6bcb-0fa2-3c738c8ca85e/8447053031735.jpg/600x600bb.jpg",
-      "link": "",
+      "link": "https://music.apple.com/us/album/por-las-buenas/1718253305",
       "descripcion": ""
     },
     {
       "titulo": "MAGAMUNDI",
       "artista": "ALONG",
       "rol": "Producción · Mezcla · Composición",
-      "año": "2025",
+      "año": "2026",
       "cover": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/88/68/78/886878a6-2a74-322e-0186-5fe255b40eaf/artwork.jpg/600x600bb.jpg",
+      "link": "https://music.apple.com/us/album/1896109578",
+      "descripcion": ""
+    },
+    {
+      "titulo": "Corto Plazo",
+      "artista": "FAVZTO",
+      "rol": "Producción · Mezcla · Masterización",
+      "año": "2026",
+      "cover": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/45/28/d3/4528d3bb-9dc6-31ae-7f56-89c7390e23e2/824296638019_cover.jpg/600x600bb.jpg",
+      "link": "https://music.apple.com/us/album/corto-plazo/6769809077",
+      "descripcion": ""
+    },
+    {
+      "titulo": "Qué costumbre tan salvaje / DOOMINACIÓN",
+      "artista": "PERSONA",
+      "rol": "Producción · Mezcla · Masterización · Composición",
+      "año": "2026",
+      "cover": "assets/covers/persona.jpg",
       "link": "",
       "descripcion": ""
     }
