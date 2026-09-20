@@ -7,7 +7,7 @@
 <meta name="description" content="Pre-regístrate al próximo tokín de Saudaji. Entérate primero: fecha, lugar y boletos.">
 <style>
   /* Página aparte para el pre-registro de un tokín (no es parte de index.html).
-     Junta correos vía Formspree para armar el mailing list. Mismo look que el sitio:
+     Junta correos en un Google Form (hoja de saudaji@saudaji.com). Mismo look que el sitio:
      blanco + canvas de fotos que parpadean. Datos del evento salen de content.json. */
   :root {
     --verde: #3c795c;
@@ -181,14 +181,9 @@
   <p class="detalle" id="ev-detalle"></p>
   <p class="texto" id="ev-texto">Apúntate y entérate primero: fecha, lugar, boletos y acceso.</p>
 
-  <!-- Formspree para el mailing list. Pasos para activarlo:
-       1. Crea una cuenta gratis en formspree.io con saudaji@saudaji.com.
-       2. Crea un form NUEVO (aparte del de contacto) y copia su ID.
-       3. Reemplaza TU_ID_MAILING_AQUI abajo por ese ID.
-       Con eso, cada pre-registro llega a tu panel de Formspree y puedes exportar
-       todos los correos (CSV) para tu mailing list. Mientras siga el placeholder,
-       usa el fallback mailto (abre el correo del visitante) y funciona igual. -->
-  <form id="form-tokin" action="https://formspree.io/f/TU_ID_MAILING_AQUI" method="POST" novalidate>
+  <!-- Los registros se mandan por JS al Google Form de saudaji@saudaji.com y caen
+       en su hoja de cálculo (ver el script al final: GFORM y los entry.XXXX). -->
+  <form id="form-tokin" novalidate>
     <div class="campo">
       <label for="t-nombre">Nombre *</label>
       <input id="t-nombre" name="nombre" type="text" required autocomplete="name">
@@ -260,8 +255,19 @@ var EMAIL = 'saudaji@saudaji.com';
   }).catch(function () {});
 })();
 
-/* ---------- envío: Formspree si está configurado, si no mailto ---------- */
+/* ---------- envío: va directo a un Google Form ----------
+   El visitante nunca ve Google: llena ESTE formulario y por debajo se manda al
+   Google Form de saudaji@saudaji.com, que guarda todo en su hoja de cálculo.
+   Se usa mode:'no-cors' porque Google no manda cabeceras CORS: el envío sí entra,
+   pero el navegador no deja leer la respuesta (por eso se asume éxito).
+   Para cambiar de formulario: saca los entry.XXXX del nuevo y cámbialos aquí. */
 (function () {
+  /* ===== configuración del Google Form ===== */
+  var GFORM = 'https://docs.google.com/forms/d/e/1FAIpQLSdvE6pc-aFAAB2_KUZQ6OckhwvgNcRfJPtQabnTx4yDqzDtfQ/formResponse';
+  var CAMPO_NOMBRE = 'entry.1050355688';
+  var CAMPO_CORREO = 'entry.1429887576';
+  /* ========================================= */
+
   var form = document.getElementById('form-tokin');
   var estado = form.querySelector('.estado');
   form.addEventListener('submit', function (ev) {
@@ -280,27 +286,20 @@ var EMAIL = 'saudaji@saudaji.com';
       nombre: nombre.value.trim(),
       email: email.value.trim()
     };
-    var configurado = form.action.indexOf('TU_ID_MAILING_AQUI') === -1;
-    if (configurado) {
-      estado.textContent = 'Enviando…';
-      fetch(form.action, {
-        method: 'POST',
-        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-        body: JSON.stringify(datos)
-      }).then(function (r) {
-        if (r.ok) { document.body.classList.add('enviado'); }
-        else { throw 0; }
-      }).catch(function () {
+    estado.textContent = 'Enviando…';
+    var cuerpo = new URLSearchParams();
+    cuerpo.append(CAMPO_NOMBRE, datos.nombre);
+    cuerpo.append(CAMPO_CORREO, datos.email);
+
+    fetch(GFORM, { method: 'POST', mode: 'no-cors', body: cuerpo })
+      .then(function () {
+        document.body.classList.add('enviado');   // registro guardado en la hoja
+      })
+      .catch(function () {
+        // si de plano no hubo red, deja escribir por correo
         estado.className = 'estado error';
-        estado.textContent = 'No se pudo enviar. Escríbeme a ' + EMAIL;
+        estado.innerHTML = 'No se pudo enviar. Escríbeme a <a href="mailto:' + EMAIL + '">' + EMAIL + '</a>';
       });
-    } else {
-      var cuerpo = 'Quiero pre-registrarme al tokín.\n\nNombre: ' + datos.nombre +
-        '\nCorreo: ' + datos.email;
-      window.location.href = 'mailto:' + EMAIL + '?subject=' +
-        encodeURIComponent('Pre-registro tokín — ' + datos.nombre) + '&body=' + encodeURIComponent(cuerpo);
-      document.body.classList.add('enviado');
-    }
   });
 })();
 </script>
