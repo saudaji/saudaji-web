@@ -71,6 +71,15 @@
   }
   nav a:hover { color: var(--verde); }
 
+  /* link del show próximo: resalta en naranja y late suave */
+  nav a.nav-concierto {
+    color: #d9541f;
+    font-weight: 700;
+    animation: concierto-late 2.4s ease-in-out infinite;
+  }
+  nav a.nav-concierto:hover { color: #b33f12; }
+  @keyframes concierto-late { 50% { opacity: 0.55; } }
+
   /* ---------- secciones ---------- */
   section {
     max-width: 640px;
@@ -643,6 +652,7 @@
     <img class="logo" src="assets/logo.svg" alt="Saudaji">
   </h1>
   <nav>
+    <a class="nav-concierto" href="concierto.html">Concierto 26 sept</a>
     <a href="#bio">Bio</a>
     <a href="#musica">Música</a>
     <a href="#trabajo">Trabajo</a>
