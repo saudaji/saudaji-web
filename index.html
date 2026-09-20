@@ -771,7 +771,7 @@
        1. Crea cuenta gratis en formspree.io con saudaji@saudaji.com y crea un "New form".
        2. Copia el ID que te da (ej. https://formspree.io/f/abcd1234) y reemplaza TU_ID_AQUI abajo.
        Mientras el placeholder siga ahí, el formulario usa mailto: como fallback y funciona desde el día 1. -->
-  <form id="form-contacto" action="https://formspree.io/f/TU_ID_AQUI" method="POST" novalidate>
+  <form id="form-contacto" novalidate>
     <div class="fc-campo">
       <label for="fc-nombre">Nombre *</label>
       <input id="fc-nombre" name="nombre" type="text" required autocomplete="name">
@@ -780,16 +780,21 @@
       <label for="fc-tipo">Tipo de proyecto</label>
       <select id="fc-tipo" name="tipo">
         <option value="Producción">Producción</option>
-        <option value="Mezcla">Mezcla</option>
+        <option value="Mix">Mix</option>
+        <option value="Master">Master</option>
         <option value="Composición">Composición</option>
       </select>
     </div>
     <div class="fc-campo">
-      <label for="fc-rolas">¿Cuántas rolas?</label>
-      <div class="fc-rolas">
-        <input id="fc-rolas" name="rolas" type="number" min="1" max="99" value="1" inputmode="numeric">
-        <label class="fc-album"><input id="fc-album" name="album" type="checkbox"> Álbum</label>
-      </div>
+      <label for="fc-rolas">¿Cuántas canciones?</label>
+      <select id="fc-rolas" name="canciones">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="Albúm o EP">Álbum o EP</option>
+      </select>
     </div>
     <div class="fc-campo">
       <label for="fc-tel">Número (teléfono)</label>
@@ -1080,16 +1085,19 @@
    Fallback: mailto a saudaji@saudaji.com con los campos prellenados — funciona
    sin configurar nada. Honeypot: si el campo oculto trae texto, es un bot. */
 (function () {
+  /* ===== Google Form de trabajo (hoja de saudaji@saudaji.com) =====
+     Los valores de los <select> deben ser IDÉNTICOS a las opciones del
+     formulario de Google; si allá cambian los textos, cámbialos aquí también. */
+  var GFORM = 'https://docs.google.com/forms/d/e/1FAIpQLSd8OuqQiFjTQKlK_TIUSTvsUt2bkCivpVJxvGK82OU3QKYg1g/formResponse';
+  var C_NOMBRE = 'entry.1152407059';
+  var C_TIPO = 'entry.1843537593';
+  var C_CANCIONES = 'entry.435474368';
+  var C_TEL = 'entry.401038771';
+  var C_CORREO = 'entry.176961981';
+  /* ============================================================== */
+
   var form = document.getElementById('form-contacto');
   var estado = form.querySelector('.fc-estado');
-  var album = document.getElementById('fc-album');
-  var rolas = document.getElementById('fc-rolas');
-
-  // "Álbum" deshabilita el número de rolas (elección clara: N rolas O álbum)
-  album.addEventListener('change', function () {
-    rolas.disabled = album.checked;
-    rolas.style.opacity = album.checked ? 0.35 : 1;
-  });
 
   function validar() {
     var ok = true;
@@ -1114,42 +1122,24 @@
       estado.textContent = 'Revisa los campos marcados.';
       return;
     }
-    var cantidad = album.checked ? 'Álbum' : (rolas.value + ' rola(s)');
-    var datos = {
-      nombre: document.getElementById('fc-nombre').value.trim(),
-      tipo: document.getElementById('fc-tipo').value,
-      cantidad: cantidad,
-      telefono: document.getElementById('fc-tel').value.trim() || '(no dio)',
-      email: document.getElementById('fc-email').value.trim()
-    };
-    var configurado = form.action.indexOf('TU_ID_AQUI') === -1;
-    if (configurado) {
-      estado.textContent = 'Enviando…';
-      fetch(form.action, {
-        method: 'POST',
-        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-        body: JSON.stringify(datos)
-      }).then(function (r) {
-        if (r.ok) {
-          estado.className = 'fc-estado ok';
-          estado.textContent = 'Enviado. Te contesto pronto ✓';
-          form.reset();
-          rolas.disabled = false; rolas.style.opacity = 1;
-        } else { throw 0; }
-      }).catch(function () {
+    estado.textContent = 'Enviando…';
+    var cuerpo = new URLSearchParams();
+    cuerpo.append(C_NOMBRE, document.getElementById('fc-nombre').value.trim());
+    cuerpo.append(C_TIPO, document.getElementById('fc-tipo').value);
+    cuerpo.append(C_CANCIONES, document.getElementById('fc-rolas').value);
+    cuerpo.append(C_TEL, document.getElementById('fc-tel').value.trim());
+    cuerpo.append(C_CORREO, document.getElementById('fc-email').value.trim());
+
+    fetch(GFORM, { method: 'POST', mode: 'no-cors', body: cuerpo })
+      .then(function () {
+        estado.className = 'fc-estado ok';
+        estado.textContent = '¡Enviado! Te contesto pronto ✓';
+        form.reset();
+      })
+      .catch(function () {
         estado.className = 'fc-estado error';
-        estado.textContent = 'No se pudo enviar. Escríbeme directo a saudaji@saudaji.com';
+        estado.innerHTML = 'No se pudo enviar. Escríbeme a <a href="mailto:saudaji@saudaji.com">saudaji@saudaji.com</a>';
       });
-    } else {
-      // fallback: abre el correo del visitante con todo prellenado
-      var cuerpo = 'Nombre: ' + datos.nombre + '\nTipo de proyecto: ' + datos.tipo +
-        '\nCantidad: ' + datos.cantidad + '\nTeléfono: ' + datos.telefono + '\nCorreo: ' + datos.email;
-      window.location.href = 'mailto:saudaji@saudaji.com?subject=' +
-        encodeURIComponent('Proyecto: ' + datos.tipo + ' (' + datos.cantidad + ') — ' + datos.nombre) +
-        '&body=' + encodeURIComponent(cuerpo);
-      estado.className = 'fc-estado ok';
-      estado.textContent = 'Se abrió tu correo con los datos listos para enviar.';
-    }
   });
 })();
 
