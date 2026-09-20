@@ -197,10 +197,6 @@
       <label for="t-email">Correo *</label>
       <input id="t-email" name="email" type="email" required autocomplete="email" inputmode="email">
     </div>
-    <div class="campo">
-      <label for="t-ciudad">Ciudad (opcional)</label>
-      <input id="t-ciudad" name="ciudad" type="text" autocomplete="address-level2">
-    </div>
     <input class="trampa" type="text" name="sitio_web" tabindex="-1" autocomplete="off" aria-hidden="true">
     <input type="hidden" name="_subject" value="Nuevo pre-registro — tokín">
     <p class="estado" role="status" aria-live="polite"></p>
@@ -282,8 +278,7 @@ var EMAIL = 'saudaji@saudaji.com';
 
     var datos = {
       nombre: nombre.value.trim(),
-      email: email.value.trim(),
-      ciudad: (document.getElementById('t-ciudad').value.trim() || '—')
+      email: email.value.trim()
     };
     var configurado = form.action.indexOf('TU_ID_MAILING_AQUI') === -1;
     if (configurado) {
@@ -301,7 +296,7 @@ var EMAIL = 'saudaji@saudaji.com';
       });
     } else {
       var cuerpo = 'Quiero pre-registrarme al tokín.\n\nNombre: ' + datos.nombre +
-        '\nCorreo: ' + datos.email + '\nCiudad: ' + datos.ciudad;
+        '\nCorreo: ' + datos.email;
       window.location.href = 'mailto:' + EMAIL + '?subject=' +
         encodeURIComponent('Pre-registro tokín — ' + datos.nombre) + '&body=' + encodeURIComponent(cuerpo);
       document.body.classList.add('enviado');
