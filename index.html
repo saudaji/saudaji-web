@@ -238,10 +238,36 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transform: scaleX(-1);   /* espejo real: te ves como en un espejo */
+    /* sin voltear: usamos la cámara TRASERA, no es un espejo de tu cara */
     /* opacity / filter / mix-blend-mode se aplican desde JS con las constantes
        nombradas al inicio del script de cámara — edítalas ahí, no aquí */
   }
+
+  /* ---------- con la cámara encendida: TODO el texto en blanco ----------
+     sobre el video el texto oscuro no se ve, así que invertimos la paleta
+     y le ponemos sombra para que se lea sobre cualquier imagen. */
+  html.cam-activa {
+    --tinta: #ffffff;
+    --tinta-suave: rgba(255, 255, 255, 0.8);
+    --linea: rgba(255, 255, 255, 0.45);
+  }
+  html.cam-activa body { color: #fff; }
+  html.cam-activa h1, html.cam-activa h2, html.cam-activa h3,
+  html.cam-activa p, html.cam-activa li, html.cam-activa a,
+  html.cam-activa span, html.cam-activa label {
+    text-shadow: 0 1px 7px rgba(0, 0, 0, 0.75);
+  }
+  /* botones flotantes: fondo oscuro para que contrasten sobre el video */
+  html.cam-activa #cam-toggle,
+  html.cam-activa .portal {
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+  html.cam-activa .boton:hover { background: #fff; color: #111; }
+  html.cam-activa .campo input,
+  html.cam-activa .fc-campo input,
+  html.cam-activa .fc-campo select { background: rgba(0, 0, 0, 0.35); color: #fff; }
 
   /* ---------- collage de fotos (assets/fuji) ----------
      Miniaturas dispersas que cubren la pantalla y aparecen como un destello.
@@ -754,6 +780,7 @@
   var CAMERA_OPACITY = 0.75;   // 0 = invisible, 1 = cámara cruda. Alto para verse como espejo sobre blanco.
   var CAMERA_FILTER = 'grayscale(0.25) contrast(1.05)'; // tratamiento visual del video
   var CAMERA_BLEND = 'normal'; // 'normal' se ve directo; 'multiply' lo integra al blanco
+  var CAMERA_FACING = 'environment'; // 'environment' = cámara TRASERA; 'user' sería la frontal
   var CAMERA_RES = { width: { ideal: 1280 }, height: { ideal: 720 } }; // bajarla ahorra batería
   /* ============================================================ */
 
@@ -770,13 +797,22 @@
     if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; }
     if (video) { video.remove(); video = null; }
     capa.classList.remove('cam-on');   // vuelve a mostrar el collage
+    document.documentElement.classList.remove('cam-activa'); // texto vuelve a oscuro
     btn.classList.remove('on');
     btn.setAttribute('aria-pressed', 'false');
     btn.textContent = 'Modo espejo';
   }
   btn.addEventListener('click', function () {
     if (stream) { apagar(); return; }
-    navigator.mediaDevices.getUserMedia({ video: CAMERA_RES, audio: false }).then(function (s) {
+    var constraints = {
+      video: {
+        width: CAMERA_RES.width,
+        height: CAMERA_RES.height,
+        facingMode: { ideal: CAMERA_FACING }   // trasera en celular
+      },
+      audio: false
+    };
+    navigator.mediaDevices.getUserMedia(constraints).then(function (s) {
       stream = s;
       video = document.createElement('video');
       video.id = 'cam-video';
@@ -789,6 +825,7 @@
       video.srcObject = s;
       capa.append(video);
       capa.classList.add('cam-on');   // desvanece el collage para ver la cámara
+      document.documentElement.classList.add('cam-activa'); // texto en blanco
       btn.classList.add('on');
       btn.setAttribute('aria-pressed', 'true');
       btn.textContent = 'Cámara activa — apagar';

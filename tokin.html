@@ -53,6 +53,16 @@
     padding: 8rem 1.5rem 4rem;
     text-align: center;
   }
+  .cartel {
+    width: 100%;
+    max-width: 360px;
+    height: auto;
+    display: block;
+    margin: 0 auto 2.2rem;
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.22);
+  }
+  .cartel[hidden] { display: none; }
+
   .kicker {
     font-size: 11px;
     letter-spacing: 0.4em;
@@ -165,6 +175,7 @@
 <a class="home" href="index.html" aria-label="Volver a saudaji.com"><img src="assets/logo.svg" alt="Saudaji"></a>
 
 <main>
+  <img id="ev-cartel" class="cartel" alt="Cartel del tokín" hidden>
   <p class="kicker">Pre-registro</p>
   <h1 id="ev-titulo">Próximo tokín</h1>
   <p class="detalle" id="ev-detalle"></p>
@@ -244,6 +255,11 @@ var EMAIL = 'saudaji@saudaji.com';
     if (e.cta) document.querySelector('#form-tokin button').textContent = e.cta;
     var det = [e.fecha, e.lugar].filter(Boolean).join('  ·  ');
     document.getElementById('ev-detalle').textContent = det;
+    if (e.cartel) {                       // cartel del show, si hay
+      var c = document.getElementById('ev-cartel');
+      c.src = e.cartel;
+      c.hidden = false;
+    }
     if (e.titulo) document.title = 'SAUDAJI — ' + e.titulo;
   }).catch(function () {});
 })();

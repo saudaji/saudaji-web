@@ -39,13 +39,13 @@
     }
   ],
   "evento": {
-    "titulo": "Próximo tokín",
-    "fecha": "",
-    "lugar": "",
-    "texto": "Apúntate al pre-registro y entérate primero: fecha, lugar, boletos y acceso. Sin spam, solo lo importante.",
-    "cta": "Apúntame"
+    "titulo": "En vivo en Sagredo",
+    "fecha": "26 de septiembre · 8:30 pm",
+    "lugar": "Sagredo · con Desarma",
+    "texto": "Entrada GRATIS con registro. Apúntate y te mando los detalles de acceso.",
+    "cta": "Apartar mi lugar",
+    "cartel": "assets/cartel-26sept.jpg"
   },
-
   "links": {
     "instagram": "https://www.instagram.com/_saudaji",
     "x": "https://x.com/saudaji_",
