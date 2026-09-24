@@ -168,6 +168,12 @@
   /* estado de éxito: oculta el form y muestra un gracias */
   .gracias { display: none; }
   body.enviado form, body.enviado .texto { display: none; }
+  /* registro cerrado (evento.registro_cerrado en content.json): sin form, solo el aviso.
+     Mientras carga content.json el form va oculto, para que no se asome si está cerrado. */
+  body.cargando form { visibility: hidden; }
+  .cerrado { display: none; }
+  body.registro-cerrado form, body.registro-cerrado .texto, body.registro-cerrado .nota { display: none; }
+  body.registro-cerrado .cerrado { display: block; font-size: 17px; font-weight: 300; margin: 1rem auto 0; max-width: 360px; text-shadow: 0 0 8px #fff, 0 0 8px #fff; }
   body.enviado .gracias { display: block; font-size: 17px; font-weight: 300; margin: 1rem auto 0; max-width: 360px; text-shadow: 0 0 8px #fff, 0 0 8px #fff; }
 
   @media (max-width: 600px) {
@@ -177,7 +183,7 @@
   }
 </style>
 </head>
-<body>
+<body class="cargando">
 
 <div id="fondo-capa" aria-hidden="true"><div id="collage"></div></div>
 
@@ -207,6 +213,8 @@
     <p class="estado" role="status" aria-live="polite"></p>
     <button type="submit">Apúntame</button>
   </form>
+
+  <div class="cerrado" id="ev-cerrado">El registro ya cerró.</div>
 
   <div class="gracias">¡Listo! Ya estás en la lista — te aviso primero del concierto. 🌿</div>
 
@@ -267,7 +275,14 @@ var EMAIL = 'saudaji@saudaji.com';
       c.hidden = false;
     }
     if (e.titulo) document.title = 'SAUDAJI — ' + e.titulo;
-  }).catch(function () {});
+    if (e.registro_cerrado) {             // registro cerrado: quita el form, deja el aviso
+      if (e.mensaje_cerrado) document.getElementById('ev-cerrado').textContent = e.mensaje_cerrado;
+      document.body.classList.add('registro-cerrado');
+      document.querySelector('.kicker').textContent = 'Registro cerrado';
+    }
+  }).catch(function () {}).then(function () {
+    document.body.classList.remove('cargando');
+  });
 })();
 
 /* ---------- envío: va directo a un Google Form ----------
@@ -287,6 +302,7 @@ var EMAIL = 'saudaji@saudaji.com';
   var estado = form.querySelector('.estado');
   form.addEventListener('submit', function (ev) {
     ev.preventDefault();
+    if (document.body.classList.contains('registro-cerrado')) return;
     estado.className = 'estado'; estado.textContent = '';
     if (form.querySelector('.trampa').value) return;             // honeypot
     var nombre = document.getElementById('t-nombre');
