@@ -47,7 +47,11 @@
     "cartel": "assets/cartel-26sept.jpg",
     "extra": "PD: ese día también es mi cumpleaños 🎂 — vente a celebrar.",
     "registro_cerrado": true,
-    "mensaje_cerrado": "El registro ya cerró. Si te apuntaste, revisa tu correo: ahí van los detalles de acceso."
+    "mensaje_cerrado": "El registro ya cerró. Si te apuntaste, revisa tu correo: ahí van los detalles de acceso.",
+    "futuras_titulo": "Pon tu email para futuras fechas",
+    "futuras_nota": "(próximo mes — prepárate)",
+    "futuras_cta": "Avísame",
+    "futuras_gracias": "Listo, te aviso primero de la próxima fecha. 🌿"
   },
   "links": {
     "instagram": "https://www.instagram.com/_saudaji",

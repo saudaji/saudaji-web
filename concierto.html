@@ -170,10 +170,23 @@
   body.enviado form, body.enviado .texto { display: none; }
   /* registro cerrado (evento.registro_cerrado en content.json): sin form, solo el aviso.
      Mientras carga content.json el form va oculto, para que no se asome si está cerrado. */
-  body.cargando form { visibility: hidden; }
+  body.cargando #form-tokin { visibility: hidden; }
   .cerrado { display: none; }
-  body.registro-cerrado form, body.registro-cerrado .texto, body.registro-cerrado .nota { display: none; }
+  body.registro-cerrado #form-tokin, body.registro-cerrado .texto { display: none; }
   body.registro-cerrado .cerrado { display: block; font-size: 17px; font-weight: 300; margin: 1rem auto 0; max-width: 360px; text-shadow: 0 0 8px #fff, 0 0 8px #fff; }
+  /* barra "futuras fechas": solo aparece con el registro cerrado */
+  .futuras { display: none; margin: 2.2rem auto 0; max-width: 400px; }
+  body.registro-cerrado .futuras { display: block; }
+  .futuras h2 { font-size: 13px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 0.2rem; text-shadow: 0 0 6px #fff, 0 0 6px #fff; }
+  .futuras .nota-futuras { font-size: 13px; color: #d9541f; margin-bottom: 0.9rem; text-shadow: 0 0 6px #fff, 0 0 6px #fff; }
+  .futuras .barra { display: flex; border: 1px solid var(--tinta); background: #fff; }
+  .futuras .barra input { flex: 1; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 15px; padding: 0.8rem 0.85rem; color: var(--tinta); }
+  .futuras .barra input:focus { outline: none; }
+  .futuras .barra.error { border-color: #d92b2b; }
+  .futuras .barra button { width: auto; margin: 0; flex: none; padding: 0 1.2rem; }
+  .futuras .ok-futuras { display: none; font-size: 16px; font-weight: 300; text-shadow: 0 0 8px #fff, 0 0 8px #fff; }
+  .futuras.listo form { display: none; }
+  .futuras.listo .ok-futuras { display: block; }
   body.enviado .gracias { display: block; font-size: 17px; font-weight: 300; margin: 1rem auto 0; max-width: 360px; text-shadow: 0 0 8px #fff, 0 0 8px #fff; }
 
   @media (max-width: 600px) {
@@ -215,6 +228,20 @@
   </form>
 
   <div class="cerrado" id="ev-cerrado">El registro ya cerró.</div>
+
+  <div class="futuras" id="futuras">
+    <h2 id="fut-titulo">Pon tu email para futuras fechas</h2>
+    <p class="nota-futuras" id="fut-nota">(próximo mes — prepárate)</p>
+    <form id="form-futuras" novalidate>
+      <div class="barra">
+        <input id="f-email" type="email" required autocomplete="email" inputmode="email" placeholder="tu@correo.com" aria-label="Tu correo">
+        <button type="submit" id="fut-cta">Avísame</button>
+      </div>
+      <input class="trampa" type="text" name="sitio_web" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <p class="estado" role="status" aria-live="polite"></p>
+    </form>
+    <div class="ok-futuras" id="fut-gracias">Listo, te aviso primero de la próxima fecha. 🌿</div>
+  </div>
 
   <div class="gracias">¡Listo! Ya estás en la lista — te aviso primero del concierto. 🌿</div>
 
@@ -279,6 +306,10 @@ var EMAIL = 'saudaji@saudaji.com';
       if (e.mensaje_cerrado) document.getElementById('ev-cerrado').textContent = e.mensaje_cerrado;
       document.body.classList.add('registro-cerrado');
       document.querySelector('.kicker').textContent = 'Registro cerrado';
+      if (e.futuras_titulo) document.getElementById('fut-titulo').textContent = e.futuras_titulo;
+      if (e.futuras_nota) document.getElementById('fut-nota').textContent = e.futuras_nota;
+      if (e.futuras_cta) document.getElementById('fut-cta').textContent = e.futuras_cta;
+      if (e.futuras_gracias) document.getElementById('fut-gracias').textContent = e.futuras_gracias;
     }
   }).catch(function () {}).then(function () {
     document.body.classList.remove('cargando');
@@ -330,6 +361,34 @@ var EMAIL = 'saudaji@saudaji.com';
         // si de plano no hubo red, deja escribir por correo
         estado.className = 'estado error';
         estado.innerHTML = 'No se pudo enviar. Escríbeme a <a href="mailto:' + EMAIL + '">' + EMAIL + '</a>';
+      });
+  });
+
+  /* barra "futuras fechas": mismo Google Form y misma hoja. No pide nombre, así que
+     en la columna de nombre va FUTURAS para separarlos de los del registro. */
+  var formF = document.getElementById('form-futuras');
+  var estadoF = formF.querySelector('.estado');
+  formF.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    if (formF.querySelector('.trampa').value) return;            // honeypot
+    var email = document.getElementById('f-email');
+    var barra = formF.querySelector('.barra');
+    barra.classList.remove('error');
+    estadoF.className = 'estado'; estadoF.textContent = '';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.value.trim())) {
+      barra.classList.add('error');
+      estadoF.className = 'estado error'; estadoF.textContent = 'Revisa tu correo.';
+      return;
+    }
+    estadoF.textContent = 'Enviando…';
+    var cuerpo = new URLSearchParams();
+    cuerpo.append(CAMPO_NOMBRE, 'FUTURAS');
+    cuerpo.append(CAMPO_CORREO, email.value.trim());
+    fetch(GFORM, { method: 'POST', mode: 'no-cors', body: cuerpo })
+      .then(function () { document.getElementById('futuras').classList.add('listo'); })
+      .catch(function () {
+        estadoF.className = 'estado error';
+        estadoF.innerHTML = 'No se pudo enviar. Escríbeme a <a href="mailto:' + EMAIL + '">' + EMAIL + '</a>';
       });
   });
 })();
