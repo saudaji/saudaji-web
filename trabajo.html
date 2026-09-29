@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAUDAJI — Trabajemos juntos</title>
+<meta name="description" content="Producción, mezcla, master o composición para tu proyecto. Cuéntame qué necesitas.">
+<style>
+  /* Página suelta con solo el cuestionario de TRABAJO (link directo para compartir).
+     Mismo formulario y mismo Google Form que la sección Contacto de index.html.
+     Al enviar, se cambia el cuestionario por la foto del caballo (assets/caballo.jpg). */
+  :root {
+    --tinta: #1a1a1a;
+    --tinta-suave: rgba(26, 26, 26, 0.55);
+    --linea: rgba(26, 26, 26, 0.18);
+    --bg: #ffffff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--tinta);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  .home { position: fixed; top: 1.6rem; left: 2rem; z-index: 3; }
+  .home img { width: 150px; height: auto; display: block; }
+
+  main {
+    max-width: 440px;
+    margin: 0 auto;
+    padding: 9rem 1.5rem 4rem;
+    text-align: center;
+  }
+  h1 { font-size: 13px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 0.6rem; }
+  .cta-texto { font-size: 17px; font-weight: 300; max-width: 420px; margin: 0 auto 2.2rem; }
+
+  /* formulario: mismo estilo que Contacto en index.html */
+  #form-trabajo { max-width: 380px; margin: 0 auto; text-align: left; }
+  .fc-campo { margin-bottom: 1.1rem; }
+  .fc-campo > label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--tinta-suave);
+    margin-bottom: 0.35rem;
+  }
+  .fc-campo input, .fc-campo select {
+    width: 100%;
+    background: #fff;
+    border: 1px solid var(--linea);
+    color: var(--tinta);
+    font: inherit;
+    font-size: 15px;
+    padding: 0.7rem 0.8rem;
+    border-radius: 0;
+  }
+  .fc-campo input:focus, .fc-campo select:focus { outline: none; border-color: var(--tinta); }
+  .fc-campo input.fc-error { border-color: #d92b2b; }
+  .fc-trampa { position: absolute; left: -9999px; opacity: 0; pointer-events: none; }
+  .fc-estado { min-height: 1.4em; font-size: 13px; text-align: center; }
+  .fc-estado.error { color: #c0392b; }
+  .boton {
+    display: block;
+    width: 100%;
+    margin: 0.5rem 0 0;
+    background: var(--tinta);
+    color: #fff;
+    border: 1px solid var(--tinta);
+    font: inherit;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    padding: 1rem;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+  }
+  .boton:hover { background: #fff; color: var(--tinta); }
+
+  /* después de enviar: solo la foto */
+  .listo { display: none; }
+  .listo img { width: 100%; max-width: 380px; height: auto; display: block; margin: 0 auto; box-shadow: 0 6px 30px rgba(0, 0, 0, 0.22); }
+  body.enviado .cuestionario { display: none; }
+  body.enviado .listo { display: block; }
+
+  .volver {
+    display: inline-block;
+    margin-top: 2.5rem;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--tinta-suave);
+    border-bottom: 1px solid var(--linea);
+  }
+
+  @media (max-width: 600px) {
+    .home { left: 1.2rem; top: 1.2rem; }
+    .home img { width: 120px; }
+    main { padding: 7rem 1.4rem 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<a class="home" href="index.html" aria-label="Volver a saudaji.com"><img src="assets/logo.svg" alt="Saudaji"></a>
+
+<main>
+  <div class="cuestionario">
+    <h1>Trabajemos juntos</h1>
+    <p class="cta-texto">¿Buscas producción, mezcla o composición para tu proyecto?</p>
+
+    <form id="form-trabajo" novalidate>
+      <div class="fc-campo">
+        <label for="fc-nombre">Nombre *</label>
+        <input id="fc-nombre" name="nombre" type="text" required autocomplete="name">
+      </div>
+      <div class="fc-campo">
+        <label for="fc-tipo">Tipo de proyecto</label>
+        <select id="fc-tipo" name="tipo">
+          <option value="Producción">Producción</option>
+          <option value="Mix">Mix</option>
+          <option value="Master">Master</option>
+          <option value="Composición">Composición</option>
+        </select>
+      </div>
+      <div class="fc-campo">
+        <label for="fc-rolas">¿Cuántas canciones?</label>
+        <select id="fc-rolas" name="canciones">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="Albúm o EP">Álbum o EP</option>
+        </select>
+      </div>
+      <div class="fc-campo">
+        <label for="fc-tel">Número (teléfono)</label>
+        <input id="fc-tel" name="telefono" type="tel" inputmode="tel" placeholder="+52 ..." autocomplete="tel">
+      </div>
+      <div class="fc-campo">
+        <label for="fc-email">Correo *</label>
+        <input id="fc-email" name="email" type="email" required autocomplete="email" inputmode="email">
+      </div>
+      <input class="fc-trampa" type="text" name="sitio_web" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <p class="fc-estado" role="status" aria-live="polite"></p>
+      <button class="boton" type="submit">Enviar</button>
+    </form>
+  </div>
+
+  <div class="listo">
+    <img src="assets/caballo.jpg" alt="Un caballo con lentes frente a una laptop">
+  </div>
+
+  <a class="volver" href="index.html">← saudaji.com</a>
+</main>
+
+<script>
+(function () {
+  /* mismo Google Form de trabajo que index.html (sección Contacto). Los valores de
+     los <select> deben ser IDÉNTICOS a las opciones del formulario de Google;
+     si cambian allá, cámbialos aquí y en index.html. */
+  var GFORM = 'https://docs.google.com/forms/d/e/1FAIpQLSd8OuqQiFjTQKlK_TIUSTvsUt2bkCivpVJxvGK82OU3QKYg1g/formResponse';
+  var C_NOMBRE = 'entry.1152407059';
+  var C_TIPO = 'entry.1843537593';
+  var C_CANCIONES = 'entry.435474368';
+  var C_TEL = 'entry.401038771';
+  var C_CORREO = 'entry.176961981';
+
+  new Image().src = 'assets/caballo.jpg';   // precarga, para que salga al instante
+
+  var form = document.getElementById('form-trabajo');
+  var estado = form.querySelector('.fc-estado');
+
+  function validar() {
+    var ok = true;
+    var nombre = document.getElementById('fc-nombre');
+    var email = document.getElementById('fc-email');
+    var tel = document.getElementById('fc-tel');
+    [nombre, email, tel].forEach(function (c) { c.classList.remove('fc-error'); });
+    if (!nombre.value.trim()) { nombre.classList.add('fc-error'); ok = false; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.value.trim())) { email.classList.add('fc-error'); ok = false; }
+    if (tel.value.trim() && !/^[+]?[\d\s\-().]{7,20}$/.test(tel.value.trim())) { tel.classList.add('fc-error'); ok = false; }
+    return ok;
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    estado.className = 'fc-estado';
+    estado.textContent = '';
+    if (form.querySelector('.fc-trampa').value) return;     // honeypot
+    if (!validar()) {
+      estado.className = 'fc-estado error';
+      estado.textContent = 'Revisa los campos marcados.';
+      return;
+    }
+    estado.textContent = 'Enviando…';
+    var cuerpo = new URLSearchParams();
+    cuerpo.append(C_NOMBRE, document.getElementById('fc-nombre').value.trim());
+    cuerpo.append(C_TIPO, document.getElementById('fc-tipo').value);
+    cuerpo.append(C_CANCIONES, document.getElementById('fc-rolas').value);
+    cuerpo.append(C_TEL, document.getElementById('fc-tel').value.trim());
+    cuerpo.append(C_CORREO, document.getElementById('fc-email').value.trim());
+
+    fetch(GFORM, { method: 'POST', mode: 'no-cors', body: cuerpo })
+      .then(function () { document.body.classList.add('enviado'); window.scrollTo(0, 0); })
+      .catch(function () {
+        estado.className = 'fc-estado error';
+        estado.innerHTML = 'No se pudo enviar. Escríbeme a <a href="mailto:saudaji@saudaji.com">saudaji@saudaji.com</a>';
+      });
+  });
+})();
+</script>
+</body>
+</html>
