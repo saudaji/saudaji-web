@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAUDAJI — Futuras fechas</title>
+<meta name="description" content="Deja tu correo y entérate primero de las próximas fechas de Saudaji.">
+<style>
+  /* Página suelta con solo el cuestionario de "futuras fechas" (link directo para compartir).
+     Manda al mismo Google Form que concierto.html; en nombre llega FUTURAS.
+     Al enviar, se cambia el cuestionario por la foto del caballo (assets/caballo.jpg). */
+  :root {
+    --tinta: #1a1a1a;
+    --tinta-suave: rgba(26, 26, 26, 0.55);
+    --linea: rgba(26, 26, 26, 0.18);
+    --bg: #ffffff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--tinta);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  .home { position: fixed; top: 1.6rem; left: 2rem; z-index: 3; }
+  .home img { width: 150px; height: auto; display: block; }
+
+  main {
+    max-width: 440px;
+    margin: 0 auto;
+    padding: 9rem 1.5rem 4rem;
+    text-align: center;
+  }
+  h1 { font-size: 13px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 0.2rem; }
+  .nota-futuras { font-size: 13px; color: #d9541f; margin-bottom: 1.2rem; }
+
+  .barra { display: flex; border: 1px solid var(--tinta); background: #fff; }
+  .barra input { flex: 1; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 15px; padding: 0.8rem 0.85rem; color: var(--tinta); }
+  .barra input:focus { outline: none; }
+  .barra.error { border-color: #d92b2b; }
+  .barra button {
+    flex: none;
+    background: var(--tinta);
+    color: #fff;
+    border: 0;
+    font: inherit;
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    padding: 0 1.2rem;
+    cursor: pointer;
+  }
+  .trampa { position: absolute; left: -9999px; opacity: 0; pointer-events: none; }
+  .estado { min-height: 1.4em; font-size: 13px; margin: 0.5rem 0; }
+  .estado.error { color: #c0392b; }
+  .nota { font-size: 11px; color: var(--tinta-suave); margin-top: 1.2rem; }
+
+  /* después de enviar: solo la foto */
+  .listo { display: none; }
+  .listo img { width: 100%; max-width: 380px; height: auto; display: block; margin: 0 auto; box-shadow: 0 6px 30px rgba(0, 0, 0, 0.22); }
+  body.enviado .cuestionario { display: none; }
+  body.enviado .listo { display: block; }
+
+  .volver {
+    display: inline-block;
+    margin-top: 2.5rem;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--tinta-suave);
+    border-bottom: 1px solid var(--linea);
+  }
+
+  @media (max-width: 600px) {
+    .home { left: 1.2rem; top: 1.2rem; }
+    .home img { width: 120px; }
+    main { padding: 7rem 1.4rem 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<a class="home" href="index.html" aria-label="Volver a saudaji.com"><img src="assets/logo.svg" alt="Saudaji"></a>
+
+<main>
+  <div class="cuestionario">
+    <h1>Pon tu email para futuras fechas</h1>
+    <p class="nota-futuras">(próximo mes — prepárate)</p>
+    <form id="form-futuras" novalidate>
+      <div class="barra">
+        <input id="f-email" type="email" required autocomplete="email" inputmode="email" placeholder="tu@correo.com" aria-label="Tu correo">
+        <button type="submit">Avísame</button>
+      </div>
+      <input class="trampa" type="text" name="sitio_web" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <p class="estado" role="status" aria-live="polite"></p>
+    </form>
+    <p class="nota">Tus datos solo se usan para avisarte de este proyecto. Cero spam.</p>
+  </div>
+
+  <div class="listo">
+    <img src="assets/caballo.jpg" alt="Un caballo con lentes frente a una laptop">
+  </div>
+
+  <a class="volver" href="index.html">← saudaji.com</a>
+</main>
+
+<script>
+(function () {
+  /* mismo Google Form que concierto.html (ver ahí si se cambia de formulario) */
+  var GFORM = 'https://docs.google.com/forms/d/e/1FAIpQLSdvE6pc-aFAAB2_KUZQ6OckhwvgNcRfJPtQabnTx4yDqzDtfQ/formResponse';
+  var CAMPO_NOMBRE = 'entry.1050355688';
+  var CAMPO_CORREO = 'entry.1429887576';
+  var EMAIL = 'saudaji@saudaji.com';
+
+  new Image().src = 'assets/caballo.jpg';   // precarga, para que salga al instante
+
+  var form = document.getElementById('form-futuras');
+  var estado = form.querySelector('.estado');
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    if (form.querySelector('.trampa').value) return;             // honeypot
+    var email = document.getElementById('f-email');
+    var barra = form.querySelector('.barra');
+    barra.classList.remove('error');
+    estado.className = 'estado'; estado.textContent = '';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.value.trim())) {
+      barra.classList.add('error');
+      estado.className = 'estado error'; estado.textContent = 'Revisa tu correo.';
+      return;
+    }
+    estado.textContent = 'Enviando…';
+    var cuerpo = new URLSearchParams();
+    cuerpo.append(CAMPO_NOMBRE, 'FUTURAS');
+    cuerpo.append(CAMPO_CORREO, email.value.trim());
+    fetch(GFORM, { method: 'POST', mode: 'no-cors', body: cuerpo })
+      .then(function () { document.body.classList.add('enviado'); window.scrollTo(0, 0); })
+      .catch(function () {
+        estado.className = 'estado error';
+        estado.innerHTML = 'No se pudo enviar. Escríbeme a <a href="mailto:' + EMAIL + '">' + EMAIL + '</a>';
+      });
+  });
+})();
+</script>
+</body>
+</html>
