@@ -3,8 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Press kit — SAUDAJI · BAM BAM ATOM.</title>
-<meta name="description" content="Press kit y rider de SAUDAJI y BAM BAM ATOM. — bio, música, lanzamientos, conciertos, rider técnico y contacto.">
+<title>Saudaji + BAM BAM ATOM. — Propuesta para Bar Liebre</title>
+<meta name="description" content="Propuesta de show para Bar Liebre: Saudaji + BAM BAM ATOM. — bio, música, rider técnico y contacto de cada proyecto.">
+<!-- propuesta para un foro: no se enlaza desde index ni se indexa -->
+<meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -104,6 +106,7 @@
     padding: 2.6rem clamp(1.2rem, 4vw, 2.6rem);
     margin-bottom: 1.4rem;
     text-align: center;
+    scroll-margin-top: 3.5rem;  /* que la barra fija no tape el título al saltar con el menú */
   }
 
   h2 {
@@ -242,6 +245,25 @@
     color: var(--amarillo);
   }
 
+  /* bloque de la propuesta: va antes de los dos artistas */
+  .propuesta { --acento: var(--texto); border-color: rgba(244,239,230,0.4); }
+  .propuesta .para {
+    display: block; margin-bottom: 1.2rem;
+    font-size: 11px; letter-spacing: 0.42em; text-transform: uppercase; color: var(--texto-suave);
+  }
+  .propuesta .cartel-noche {
+    font-size: clamp(22px, 4.6vw, 32px); font-weight: 700; line-height: 1.25;
+    margin-bottom: 1.6rem;
+  }
+  .propuesta .cartel-noche .s { color: var(--naranja); }
+  .propuesta .cartel-noche .b { color: var(--amarillo); font-family: "Poppins", sans-serif; }
+  .propuesta .mas { color: var(--texto-suave); font-weight: 300; }
+  .propuesta .actos { list-style: none; text-align: left; max-width: 520px; margin: 0 auto 1.4rem; font-weight: 300; }
+  .propuesta .actos li { margin-bottom: 0.9rem; padding-left: 1rem; border-left: 2px solid var(--linea); }
+  .propuesta .actos li b { font-weight: 600; }
+  .propuesta .actos li.s { border-color: var(--naranja); }
+  .propuesta .actos li.b { border-color: var(--amarillo); }
+
   /* BAM BAM ATOM. usa Poppins, como su EPK */
   #bba .contenido { font-family: "Poppins", "Helvetica Neue", Arial, sans-serif; }
   #bba .portada .logo { width: min(260px, 60vw); }
@@ -266,7 +288,8 @@
 <div class="barra">
   <a class="inicio" href="index.html">← saudaji.com</a>
   <nav>
-    <a href="#saudaji">Saudaji</a>
+    <a href="#propuesta">Propuesta</a>
+    <a href="#saudaji-bio">Saudaji</a>
     <a href="#bba">BAM BAM ATOM.</a>
   </nav>
 </div>
@@ -280,11 +303,26 @@
 
     <header class="portada">
       <img class="logo" src="assets/logo.svg" alt="SAUDAJI">
-      <span class="etiqueta">Press kit</span>
-      <a class="bajar" href="#saudaji-bio" aria-label="Bajar">↓</a>
+      <span class="etiqueta">+ BAM BAM ATOM. · Propuesta para Bar Liebre</span>
+      <a class="bajar" href="#propuesta" aria-label="Bajar">↓</a>
     </header>
 
     <div class="panel">
+
+      <section class="bloque propuesta" id="propuesta">
+        <span class="para">Propuesta para Bar Liebre</span>
+        <div class="cartel-noche"><span class="s">Saudaji</span> <span class="mas">+</span> <span class="b">BAM BAM ATOM.</span></div>
+        <p>Una noche, dos proyectos de la escena independiente de la Ciudad de México.</p>
+        <ul class="actos">
+          <li class="s"><b>Saudaji</b> — neofolk, pop alternativo y texturas orgánicas: canciones que suenan a cuarto, a campo y a máquina.</li>
+          <li class="b"><b>BAM BAM ATOM.</b> — indie rock, soul y pop alternativo con banda de seis en vivo, rumbo a su disco debut <b>HOLY FOOL.</b> (enero 2027).</li>
+        </ul>
+        <p>Los une algo más que el cartel: Santiago Tejeda (Saudaji) coprodujo el EP debut de BAM BAM ATOM. y produjo <b>FEEL the GROOVE.</b></p>
+        <p class="nota">Abajo están la bio, la música, el rider y el contacto de cada proyecto. Fecha, horarios y condiciones las platicamos directo.</p>
+        <div class="botones">
+          <a class="boton mail-boton" href="mailto:saudaji@saudaji.com?subject=Bar%20Liebre%20%E2%80%94%20Saudaji%20%2B%20BAM%20BAM%20ATOM.">Escribir para agendar</a>
+        </div>
+      </section>
 
       <section class="bloque" id="saudaji-bio">
         <h2>Bio</h2>
