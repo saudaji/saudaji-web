@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Press kit — SAUDAJI · BAM BAM ATOM.</title>
+<meta name="description" content="Press kit y rider de SAUDAJI y BAM BAM ATOM. — bio, música, lanzamientos, conciertos, rider técnico y contacto.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Dos bloques, uno por artista, cada uno con su foto de fondo fija
+     (.fondo es sticky: funciona también en iPhone, a diferencia de
+     background-attachment: fixed). Entre los dos, una línea delgada con
+     el nombre de BAM BAM ATOM. El texto de Saudaji se refresca desde
+     content.json (igual que index.html); el HTML de abajo es el respaldo. */
+  :root {
+    --naranja: #ff6700;      /* logo de Saudaji */
+    --amarillo: #f5c97a;     /* acento del EPK de BAM BAM ATOM. */
+    --texto: #f4efe6;
+    --texto-suave: rgba(244, 239, 230, 0.68);
+    --linea: rgba(244, 239, 230, 0.22);
+    --panel: rgba(12, 10, 9, 0.62);
+    --bg: #0d0b0a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--texto);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  a { color: inherit; }
+  img { max-width: 100%; }
+
+  /* ---------- barra superior ---------- */
+  .barra {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.9rem 1.2rem;
+    font-size: 11px; letter-spacing: 0.28em; text-transform: uppercase;
+    background: linear-gradient(rgba(0,0,0,0.55), transparent);
+  }
+  .barra a { text-decoration: none; color: var(--texto-suave); transition: color 0.3s; }
+  .barra a:hover { color: var(--texto); }
+  .barra nav { display: flex; gap: 1.4rem; }
+
+  /* ---------- bloque de artista con fondo fijo ---------- */
+  .artista { position: relative; }
+
+  .fondo {
+    position: sticky; top: 0;
+    height: 100vh; height: 100svh;
+    margin-bottom: -100vh; margin-bottom: -100svh;
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+  }
+  .fondo::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0.78) 100%);
+  }
+  #saudaji .fondo { background-image: url("assets/presskit/saudaji-fondo.jpg"); background-position: 30% center; }
+  #bba .fondo { background-image: url("assets/presskit/bba-fondo.jpg"); background-position: center 30%; }
+
+  .contenido { position: relative; z-index: 1; }
+
+  .portada {
+    min-height: 100vh; min-height: 100svh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 5rem 16px 3rem;
+  }
+  .portada .logo { width: min(520px, 84vw); height: auto; display: block; }
+  .portada .etiqueta {
+    margin-top: 2rem;
+    font-size: 11px; letter-spacing: 0.5em; text-transform: uppercase;
+    color: var(--texto-suave);
+  }
+  .bajar {
+    margin-top: 3rem; font-size: 22px; text-decoration: none;
+    color: var(--texto-suave); animation: flota 2.4s ease-in-out infinite;
+  }
+  @keyframes flota { 50% { transform: translateY(6px); opacity: 0.6; } }
+
+  /* panel de lectura: oscuro y translúcido sobre la foto */
+  .panel {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 16px 6rem;
+  }
+  .bloque {
+    background: var(--panel);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--linea);
+    border-radius: 4px;
+    padding: 2.6rem clamp(1.2rem, 4vw, 2.6rem);
+    margin-bottom: 1.4rem;
+    text-align: center;
+  }
+
+  h2 {
+    font-size: 11px; font-weight: 400;
+    letter-spacing: 0.42em; text-transform: uppercase;
+    color: var(--acento);
+    margin-bottom: 2rem;
+  }
+  h3 {
+    font-size: 11px; font-weight: 400;
+    letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--texto-suave);
+    margin: 2.4rem 0 1.2rem;
+  }
+  #saudaji { --acento: var(--naranja); }
+  #bba { --acento: var(--amarillo); }
+
+  p { margin-bottom: 1.1rem; font-weight: 300; }
+  p strong, li strong { font-weight: 600; color: var(--acento); }
+  .nota { font-size: 12.5px; color: var(--texto-suave); }
+
+  .highlights { list-style: none; font-size: 13.5px; font-weight: 300; color: var(--texto-suave); }
+  .highlights li { margin-bottom: 0.8rem; }
+
+  /* ---------- grids de portadas ---------- */
+  .discos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 2rem 1.4rem;
+  }
+  .disco { text-align: center; }
+  .disco img {
+    width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block;
+    margin-bottom: 0.8rem; transition: opacity 0.3s;
+  }
+  .disco a { text-decoration: none; }
+  .disco a:hover img { opacity: 0.82; }
+  .disco .titulo { display: block; font-size: 13px; font-weight: 600; }
+  .disco .detalle { display: block; font-size: 11px; line-height: 1.55; color: var(--texto-suave); }
+
+  /* ---------- reproductores ---------- */
+  .reproductor {
+    width: 100%; border: 0; border-radius: 12px; display: block;
+    background: rgba(0,0,0,0.3);
+  }
+  .reproductor + .boton { margin-top: 1.4rem; }
+
+  .boton {
+    display: inline-block;
+    padding: 0.85rem 1.8rem;
+    border: 1px solid var(--acento);
+    color: var(--acento);
+    text-decoration: none;
+    font-size: 11px; letter-spacing: 0.28em; text-transform: uppercase;
+    transition: background 0.3s, color 0.3s;
+  }
+  .boton:hover { background: var(--acento); color: #111; }
+  .botones { display: flex; flex-wrap: wrap; gap: 0.8rem; justify-content: center; margin-top: 1.6rem; }
+
+  /* ---------- tablas del rider ---------- */
+  .tabla-scroll { overflow-x: auto; margin: 0 -0.4rem; }
+  table {
+    width: 100%; border-collapse: collapse;
+    font-size: 12.5px; font-weight: 300; text-align: left;
+  }
+  th {
+    font-size: 10px; font-weight: 400; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--acento); padding: 0.6rem 0.5rem; border-bottom: 1px solid var(--linea);
+  }
+  td { padding: 0.55rem 0.5rem; border-bottom: 1px solid rgba(244,239,230,0.08); vertical-align: top; }
+  tr.grupo td {
+    font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--texto-suave); padding-top: 1.1rem;
+  }
+  td.num { text-align: center; width: 3.5rem; }
+
+  /* stage plot: vista desde el público, fondo del escenario arriba */
+  .escenario {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8rem;
+    padding: 1rem;
+    border: 1px dashed var(--linea);
+    border-radius: 4px;
+    font-size: 11.5px; line-height: 1.5; text-align: left;
+  }
+  .escenario .pos {
+    background: rgba(255,255,255,0.05);
+    border-radius: 3px;
+    padding: 0.8rem;
+  }
+  .escenario .pos b { display: block; font-size: 12px; font-weight: 600; color: var(--acento); }
+  .escenario .pos span { display: block; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--texto-suave); margin-bottom: 0.4rem; }
+  .escenario .publico {
+    grid-column: 1 / -1; text-align: center;
+    font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--texto-suave);
+    border-top: 1px solid var(--linea); padding-top: 0.6rem;
+  }
+
+  /* ---------- carteles y prensa ---------- */
+  .carteles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.8rem;
+    margin-top: 1.6rem;
+  }
+  .carteles img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; display: block; border-radius: 2px; }
+  .medios { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin-top: 0.4rem; }
+  .medios li {
+    font-size: 12px; padding: 0.35rem 0.9rem;
+    border: 1px solid var(--linea); border-radius: 999px; color: var(--texto-suave);
+  }
+
+  .foto-bio { width: min(300px, 70%); aspect-ratio: 4 / 5; object-fit: cover; display: block; margin: 0 auto 2rem; border-radius: 2px; }
+
+  .contacto .mail { font-size: 17px; font-weight: 600; text-decoration: none; color: var(--acento); }
+  .redes { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem 1.4rem; margin-top: 1.2rem; font-size: 12.5px; }
+  .redes a { color: var(--texto-suave); text-decoration: none; }
+  .redes a:hover { color: var(--texto); }
+
+  /* ---------- divisor entre artistas ---------- */
+  .divisor {
+    position: relative; z-index: 2;
+    background: var(--bg);
+    padding: 5rem 16px;
+    text-align: center;
+  }
+  .divisor hr {
+    border: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(244,239,230,0.55), transparent);
+    max-width: 900px; margin: 0 auto 2.4rem;
+  }
+  .divisor .nombre {
+    font-family: "Poppins", sans-serif;
+    font-size: clamp(26px, 6vw, 46px); font-weight: 700; letter-spacing: 0.04em;
+    color: var(--amarillo);
+  }
+
+  /* BAM BAM ATOM. usa Poppins, como su EPK */
+  #bba .contenido { font-family: "Poppins", "Helvetica Neue", Arial, sans-serif; }
+  #bba .portada .logo { width: min(260px, 60vw); }
+
+  footer {
+    position: relative; z-index: 2; background: var(--bg);
+    text-align: center; padding: 2.4rem 16px;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--texto-suave);
+  }
+  footer a { text-decoration: none; }
+
+  @media (max-width: 560px) {
+    .barra nav { gap: 0.9rem; }
+    .barra .inicio { display: none; }
+    .escenario { grid-template-columns: 1fr 1fr; }
+    .escenario .bateria { grid-column: 1 / -1; grid-row: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="barra">
+  <a class="inicio" href="index.html">← saudaji.com</a>
+  <nav>
+    <a href="#saudaji">Saudaji</a>
+    <a href="#bba">BAM BAM ATOM.</a>
+  </nav>
+</div>
+
+<!-- ================================================================ -->
+<!-- SAUDAJI                                                          -->
+<!-- ================================================================ -->
+<div class="artista" id="saudaji">
+  <div class="fondo" aria-hidden="true"></div>
+  <div class="contenido">
+
+    <header class="portada">
+      <img class="logo" src="assets/logo.svg" alt="SAUDAJI">
+      <span class="etiqueta">Press kit</span>
+      <a class="bajar" href="#saudaji-bio" aria-label="Bajar">↓</a>
+    </header>
+
+    <div class="panel">
+
+      <section class="bloque" id="saudaji-bio">
+        <h2>Bio</h2>
+        <div id="bio-texto">
+          <p>Saudaji es el proyecto solista de Santiago Tejeda — productor, compositor, ingeniero de audio y diseñador con base en Ciudad de México. Hace música desde los 18 años y se mueve entre el neofolk, el pop alternativo y las texturas orgánicas, buscando siempre otras formas de producir y componer: canciones que suenan a cuarto, a campo y a máquina al mismo tiempo.</p>
+          <p>Como solista ha publicado los EPs «tormenta, Callada» (2024) y «☼ ☞ ☺» (2025), además del sencillo «RUIDO» (2025), todos producidos, grabados y mezclados por él mismo bajo una ética DIY. Su música retrata la ansiedad y la belleza de lo cotidiano con un enfoque honesto y artesanal.</p>
+          <p>Fuera de su proyecto es productor e ingeniero de audio, y socio y dueño de Sagredo Estudio, donde ha colaborado con artistas clave de la escena alternativa mexicana como Wet Baes, ALONG y Los Milagro. Ha tocado en más de la mitad del país y en Los Ángeles, consolidándose como parte de la nueva ola del pop independiente mexicano.</p>
+        </div>
+        <h3>Highlights</h3>
+        <ul class="highlights" id="highlights">
+          <li>Productor, compositor e ingeniero de audio. Socio y dueño de Sagredo Estudio en CDMX.</li>
+          <li>Shows y colaboraciones con Los Milagro, ALONG, Wet Baes, Daniel Quién y BAM BAM ATOM., entre otros.</li>
+          <li>Grabaciones con ALONG, Ivana, Doris Anahí, Rafa Arreguín, Fer Altuzar, Ahora Juntos, Disco Bahía y Enzo Marcelo, entre otros.</li>
+          <li>Producciones para ALONG, Fer Altuzar, BAM BAM ATOM., Doris Anahí y Ramona Vee, entre otros.</li>
+          <li>Presencia en Ibero 90.9 · presentaciones en México y Los Ángeles.</li>
+        </ul>
+      </section>
+
+      <section class="bloque">
+        <h2>Música solista</h2>
+        <div class="discos" id="musica-grid">
+          <div class="disco"><a href="https://open.spotify.com/album/1kG111eh5jam65UXGxneAT" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/01/46/ee/0146ee01-641f-b907-bace-95bb861fb210/artwork.jpg/600x600bb.jpg" alt="☼ ☞ ☺" loading="lazy"><span class="titulo">☼ ☞ ☺</span><span class="detalle">EP · 2025</span></a></div>
+          <div class="disco"><a href="https://open.spotify.com/album/1wuObFqZETqpSlS1EBWMwU" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/b9/50/f9/b950f9e6-a9b9-0803-2dea-2112aa4910eb/artwork.jpg/600x600bb.jpg" alt="RUIDO" loading="lazy"><span class="titulo">RUIDO</span><span class="detalle">Sencillo · 2025</span></a></div>
+          <div class="disco"><a href="https://open.spotify.com/album/1RJ6oxpf6dLtcOiRllG1Wu" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/18/13/78/18137857-40e9-309b-9fe1-6e546b8c588a/artwork.jpg/600x600bb.jpg" alt="tormenta, Callada" loading="lazy"><span class="titulo">tormenta, Callada</span><span class="detalle">EP · 2024</span></a></div>
+        </div>
+      </section>
+
+      <section class="bloque">
+        <h2>Producción · portafolio</h2>
+        <div class="discos" id="trabajo-grid">
+          <div class="disco"><a href="https://music.apple.com/us/album/bam-bam-atom-ep/1687196212" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/05/fe/5a/05fe5a99-40b6-025a-b900-b82807c8d049/artwork.jpg/600x600bb.jpg" alt="BAM BAM ATOM." loading="lazy"><span class="titulo">BAM BAM ATOM.</span><span class="detalle">BAM BAM ATOM. · 2023<br>Producción · Composición</span></a></div>
+          <div class="disco"><a href="https://music.apple.com/us/album/feel-the-groove-single/1721766961" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/4c/2f/4e/4c2f4e41-b5a0-8ee3-1f65-19fd3be7b26d/artwork.jpg/600x600bb.jpg" alt="FEEL the GROOVE." loading="lazy"><span class="titulo">FEEL the GROOVE.</span><span class="detalle">BAM BAM ATOM. · 2024<br>Producción · Mezcla · Composición</span></a></div>
+          <div class="disco"><a href="https://music.apple.com/us/album/eternidad-single/1837010916" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/66/62/89/666289e5-361c-6d18-7f5f-b861cb7ee5b0/0.jpg/600x600bb.jpg" alt="Eternidad" loading="lazy"><span class="titulo">Eternidad</span><span class="detalle">Fer Altuzar · 2025<br>Producción · Composición</span></a></div>
+          <div class="disco"><a href="https://music.apple.com/us/album/por-las-buenas/1718253305" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/9b/65/70/9b657079-71ef-6bcb-0fa2-3c738c8ca85e/8447053031735.jpg/600x600bb.jpg" alt="Por Las Buenas" loading="lazy"><span class="titulo">Por Las Buenas — EP</span><span class="detalle">Doris Anahí · 2023<br>Co-producción · Producción · Composición</span></a></div>
+          <div class="disco"><a href="https://music.apple.com/us/album/1896109578" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/88/68/78/886878a6-2a74-322e-0186-5fe255b40eaf/artwork.jpg/600x600bb.jpg" alt="MAGAMUNDI" loading="lazy"><span class="titulo">MAGAMUNDI</span><span class="detalle">ALONG · 2026<br>Producción · Mezcla · Composición</span></a></div>
+          <div class="disco"><a href="https://music.apple.com/us/album/corto-plazo/6769809077" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/45/28/d3/4528d3bb-9dc6-31ae-7f56-89c7390e23e2/824296638019_cover.jpg/600x600bb.jpg" alt="Corto Plazo" loading="lazy"><span class="titulo">Corto Plazo</span><span class="detalle">FAVZTO · 2026<br>Producción · Mezcla · Masterización</span></a></div>
+          <div class="disco"><img src="assets/covers/persona.jpg" alt="Qué costumbre tan salvaje / DOOMINACIÓN" loading="lazy"><span class="titulo">Qué costumbre tan salvaje / DOOMINACIÓN</span><span class="detalle">PERSONA · 2026<br>Producción · Mezcla · Masterización · Composición</span></div>
+        </div>
+      </section>
+
+      <section class="bloque">
+        <h2>Rider</h2>
+        <p>Rider técnico, input list y stage plot disponibles a solicitud — se ajustan al formato del show (solo, dúo o banda).</p>
+        <div class="botones">
+          <a class="boton mail-boton" href="mailto:saudaji@saudaji.com?subject=Rider%20Saudaji">Pedir rider</a>
+        </div>
+      </section>
+
+      <section class="bloque">
+        <h2>Escucha</h2>
+        <iframe class="reproductor" src="https://samply.app/embed/d95d5675-e41e-4646-b328-66fade2937b9" height="212" title="Saudaji en Samply" loading="lazy" allow="autoplay" allowfullscreen></iframe>
+        <a class="boton" href="https://samply.app/p/d95d5675-e41e-4646-b328-66fade2937b9?si=kj8WAVyW8mcmOQA3NewVGu4ZH2G3" target="_blank" rel="noopener">Abrir en Samply</a>
+      </section>
+
+      <section class="bloque contacto">
+        <h2>Contacto</h2>
+        <a class="mail" href="mailto:saudaji@saudaji.com">saudaji@saudaji.com</a>
+        <ul class="redes">
+          <li><a href="https://www.instagram.com/_saudaji" target="_blank" rel="noopener">Instagram @_saudaji</a></li>
+          <li><a href="https://www.tiktok.com/@saudaji_" target="_blank" rel="noopener">TikTok @saudaji_</a></li>
+          <li><a href="https://x.com/saudaji_" target="_blank" rel="noopener">X @saudaji_</a></li>
+          <li><a href="https://open.spotify.com/album/1wuObFqZETqpSlS1EBWMwU" target="_blank" rel="noopener">Spotify</a></li>
+          <li><a href="https://saudaji.bandcamp.com/album/-" target="_blank" rel="noopener">Bandcamp</a></li>
+        </ul>
+        <div class="botones">
+          <a class="boton" href="saudaji-presskit.pdf" download="saudaji-presskit.pdf">Descargar press kit (PDF)</a>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- DIVISOR                                                          -->
+<!-- ================================================================ -->
+<div class="divisor">
+  <hr>
+  <div class="nombre">BAM BAM ATOM.</div>
+</div>
+
+<!-- ================================================================ -->
+<!-- BAM BAM ATOM.                                                    -->
+<!-- ================================================================ -->
+<div class="artista" id="bba">
+  <div class="fondo" aria-hidden="true"></div>
+  <div class="contenido">
+
+    <header class="portada">
+      <img class="logo" src="assets/presskit/bba/logo.png" alt="BAM BAM ATOM.">
+      <span class="etiqueta">EPK · Rider 2026–2027</span>
+      <a class="bajar" href="#bba-bio" aria-label="Bajar">↓</a>
+    </header>
+
+    <div class="panel">
+
+      <section class="bloque" id="bba-bio">
+        <h2>Bio</h2>
+        <img class="foto-bio" src="assets/presskit/bba/foto-bio.jpg" alt="Alex Rosales — BAM BAM ATOM." loading="lazy">
+        <p><strong>BAM BAM ATOM.</strong> es el proyecto de grabación y pseudónimo de Alex Rosales, productor, compositor y multiinstrumentista de la Ciudad de México, con el cual explora los géneros del indie rock, soul y pop alternativo. Nace en 2020 inspirado en artistas como <strong>Gorillaz, BROCKHAMPTON y Childish Gambino</strong>.</p>
+        <p>Actualmente, BAM BAM ATOM. se encuentra terminando su disco debut <strong>HOLY FOOL.</strong>, programado para <strong>enero de 2027</strong>.</p>
+      </section>
+
+      <section class="bloque">
+        <h2>Escucha</h2>
+        <iframe class="reproductor" src="https://open.spotify.com/embed/artist/6bkuYPlA2hSDsMkWpclOP8?utm_source=generator&amp;theme=0" height="352" title="BAM BAM ATOM. en Spotify" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+        <a class="boton" href="https://open.spotify.com/artist/6bkuYPlA2hSDsMkWpclOP8" target="_blank" rel="noopener">Abrir en Spotify</a>
+      </section>
+
+      <section class="bloque">
+        <h2>Lanzamientos</h2>
+        <div class="discos">
+          <div class="disco"><img src="assets/presskit/bba/cover-holy-fool.jpg" alt="HOLY FOOL." loading="lazy"><span class="titulo">HOLY FOOL.</span><span class="detalle">Álbum · 27 ene 2027<br>Grabado y producido: Alejandro Rosales<br>Master: Nicholas Austin<br>Arte: Alejandro Rosales</span></div>
+          <div class="disco"><img src="assets/presskit/bba/cover-taiko.jpg" alt="TAIKO." loading="lazy"><span class="titulo">TAIKO.</span><span class="detalle">Sencillo · 8 sep 2025<br>Grabado y producido: Alejandro Rosales<br>Master: Nicholas Austin<br>Arte: Alejandro Rosales</span></div>
+          <div class="disco"><img src="assets/presskit/bba/cover-boy.jpg" alt="BOY." loading="lazy"><span class="titulo">BOY.</span><span class="detalle">Sencillo · 21 jul 2025<br>Grabado y producido: Alejandro Rosales<br>Master: Nicholas Austin<br>Arte: Alejandro Rosales</span></div>
+          <div class="disco"><img src="assets/presskit/bba/cover-cosmic.jpg" alt="COSMIC." loading="lazy"><span class="titulo">COSMIC.</span><span class="detalle">Sencillo · 9 jun 2025<br>Grabado y producido: Alejandro Rosales<br>Master: Nicholas Austin<br>Arte: Alejandro Rosales</span></div>
+          <div class="disco"><a href="https://music.apple.com/us/album/feel-the-groove-single/1721766961" target="_blank" rel="noopener"><img src="assets/presskit/bba/cover-feel-the-groove.jpg" alt="FEEL the GROOVE." loading="lazy"><span class="titulo">FEEL the GROOVE.</span><span class="detalle">EP · 3 temas · 1 feb 2024<br>Grabado y producido: Santiago Tejeda<br>Master: Rubén Ordoñez<br>Arte: Eduardo Reta</span></a></div>
+          <div class="disco"><a href="https://music.apple.com/us/album/bam-bam-atom-ep/1687196212" target="_blank" rel="noopener"><img src="assets/presskit/bba/cover-bba-ep.jpg" alt="BAM BAM ATOM. EP" loading="lazy"><span class="titulo">BAM BAM ATOM.</span><span class="detalle">EP · 4 temas · 1 jun 2023<br>Grabado y producido: Carlo Pureco y Santiago Tejeda<br>Master: Rubén Ordoñez<br>Arte: María José Cronholm</span></a></div>
+        </div>
+      </section>
+
+      <section class="bloque">
+        <h2>Conciertos</h2>
+        <p>A lo largo de 2023–2025, BAM BAM ATOM. se ha presentado con <strong>lleno total</strong> en recintos como <strong>Bajo Circuito, Multiforo 246, La Piedad y Foro Rebel</strong>, además de participar en festivales como <strong>Bahidorá y Wine &amp; Colors</strong>.</p>
+        <div class="carteles">
+          <img src="assets/presskit/bba/cartel-madriguera.jpg" alt="Cartel La Madriguera" loading="lazy">
+          <img src="assets/presskit/bba/cartel-bambox-piedad.jpg" alt="Cartel BAM BOX en La Piedad" loading="lazy">
+          <img src="assets/presskit/bba/cartel-ritmo-de-guante.jpg" alt="Cartel Ritmo de Guante — BAM BOX" loading="lazy">
+          <img src="assets/presskit/bba/cartel-winecolors.jpg" alt="Cartel Wine &amp; Colors 2024" loading="lazy">
+          <img src="assets/presskit/bba/cartel-multiforo-246.jpg" alt="Cartel Multiforo 246" loading="lazy">
+          <img src="assets/presskit/bba/cartel-bambox-sangriento.jpg" alt="Cartel BAM BOX Ultimate Championship" loading="lazy">
+        </div>
+      </section>
+
+      <section class="bloque">
+        <h2>Prensa y playlists</h2>
+        <p>BAM BAM ATOM. ha sido colocado en diferentes listas de Spotify y, gracias a la buena recepción del público, ha formado parte de segmentos especiales en portales como:</p>
+        <ul class="medios">
+          <li>Ibero 90.9</li><li>Indie Rocks! Magazine</li><li>Playlist Magazine</li><li>Reactor 105.7</li><li>Digger</li>
+        </ul>
+        <h3>Playlists</h3>
+        <ul class="medios">
+          <li>Noventa Punto Nuevo · Ibero 90.9</li><li>Tracktor List</li><li>Indie Pop</li><li>Canasta Básica</li>
+        </ul>
+      </section>
+
+      <section class="bloque" id="bba-rider">
+        <h2>Rider 2026–2027</h2>
+
+        <h3>Personal</h3>
+        <div class="tabla-scroll">
+          <table>
+            <thead><tr><th>Nombre</th><th>Ocupación</th></tr></thead>
+            <tbody>
+              <tr><td>Alejandro Rosales</td><td>Talento · voz · guitarra</td></tr>
+              <tr><td>Emilio Gorozpe</td><td>Management · talento · bajo</td></tr>
+              <tr><td>Víctor López</td><td>Talento · guitarra</td></tr>
+              <tr><td>Germán Eternod</td><td>Talento · batería</td></tr>
+              <tr><td>David Manrique</td><td>Talento · sintetizadores</td></tr>
+              <tr><td>Misael Pérez</td><td>Talento · saxofón</td></tr>
+              <tr><td>Eliot Hernández</td><td>Ingeniero de audio (opcional)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Proporcionado por BAM BAM ATOM.</h3>
+        <div class="tabla-scroll">
+          <table>
+            <thead><tr><th class="num">Cant.</th><th>Instrumento</th><th>Marca</th></tr></thead>
+            <tbody>
+              <tr class="grupo"><td colspan="3">Guitarras</td></tr>
+              <tr><td class="num">1</td><td>Guitarra acústica</td><td>Martin Macassar GPCX2E</td></tr>
+              <tr><td class="num">1</td><td>Guitarra eléctrica</td><td>Fender Stratocaster</td></tr>
+              <tr><td class="num">1</td><td>Guitarra eléctrica</td><td>Fender Telecaster Deluxe</td></tr>
+              <tr><td class="num">1</td><td>Pedalera</td><td>—</td></tr>
+              <tr><td class="num">6</td><td>Pedales de guitarra</td><td>Varios</td></tr>
+              <tr class="grupo"><td colspan="3">Bajo</td></tr>
+              <tr><td class="num">1</td><td>Bajo</td><td>Fender Mustang</td></tr>
+              <tr class="grupo"><td colspan="3">Synths</td></tr>
+              <tr><td class="num">1</td><td>Controlador MIDI</td><td>Arturia MiniLab Mk II</td></tr>
+              <tr><td class="num">1</td><td>Controlador MIDI</td><td>Akai MPK3</td></tr>
+              <tr class="grupo"><td colspan="3">Sax</td></tr>
+              <tr><td class="num">1</td><td>Saxofón</td><td>Yamaha YAS-23</td></tr>
+              <tr class="grupo"><td colspan="3">Batería (asumiendo que el foro tiene shell pack*)</td></tr>
+              <tr><td class="num">1</td><td>Tarola</td><td>—</td></tr>
+              <tr><td class="num">1</td><td>Platos</td><td>—</td></tr>
+              <tr><td class="num">1</td><td>Pedal de bombo</td><td>—</td></tr>
+              <tr><td class="num">1</td><td>Clutch hats</td><td>—</td></tr>
+              <tr class="grupo"><td colspan="3">Misceláneos</td></tr>
+              <tr><td class="num">10</td><td>Cables TS</td><td>Varios</td></tr>
+              <tr><td class="num">2</td><td>Laptop</td><td>MacBook</td></tr>
+              <tr><td class="num">2</td><td>Interfaces de audio</td><td>Focusrite</td></tr>
+              <tr><td class="num">6</td><td>In ears</td><td>Varios</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="nota" style="margin-top:1rem">*Si el foro no cuenta con shell pack, avisar a Emilio Gorozpe (management) o a Alejandro Rosales.</p>
+
+        <h3>Input list</h3>
+        <div class="tabla-scroll">
+          <table>
+            <thead><tr><th>Instrumento</th><th>Mic / DI</th><th>Base</th><th class="num">Cant.</th></tr></thead>
+            <tbody>
+              <tr><td>Voces</td><td>Micrófono de voz</td><td>1 tall boom / 2 straight</td><td class="num">3</td></tr>
+              <tr><td>Saxofón</td><td>Micrófono lavalier**</td><td>Wireless o tall boom</td><td class="num">1</td></tr>
+              <tr><td>Guitarras eléctricas</td><td>Micrófono para amplificador</td><td>Mini boom</td><td class="num">2</td></tr>
+              <tr><td>Guitarras eléctricas</td><td>Amplificador de guitarra</td><td>—</td><td class="num">2</td></tr>
+              <tr><td>Batería</td><td>Set de mics para batería</td><td>Para shell pack + platillos / tarola</td><td class="num">1</td></tr>
+              <tr><td>Gtr. acústica / bajo / synths / secuencia</td><td>Direct inputs (caja directa)</td><td>4 entradas</td><td class="num">4</td></tr>
+              <tr class="grupo"><td colspan="4">Otras necesidades</td></tr>
+              <tr><td>Synths</td><td>Stand de teclado</td><td>—</td><td class="num">1</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="nota" style="margin-top:1rem">**Pueden ser mics de voz.</p>
+
+        <h3>Monitoreo · in ears (si hay)</h3>
+        <div class="tabla-scroll">
+          <table>
+            <thead><tr><th>Mix</th><th>Instrumento</th><th>Nombre</th><th>Tipo</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Bajo</td><td>Emilio Gorozpe</td><td>Wired · mono</td></tr>
+              <tr><td>2</td><td>Guitarra</td><td>Víctor López</td><td>Wired · mono</td></tr>
+              <tr><td>3</td><td>Sintetizadores</td><td>David Manrique</td><td>Wired · mono</td></tr>
+              <tr><td>4</td><td>Saxofón</td><td>Misael Pérez</td><td>Wired · mono</td></tr>
+              <tr><td>5–6</td><td>Lead vox / guitarra</td><td>Alejandro Rosales</td><td>Wireless · stereo</td></tr>
+              <tr><td>7–8</td><td>Batería</td><td>Germán Eternod</td><td>Wired · stereo</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Stage plot</h3>
+        <div class="escenario" aria-label="Stage plot, el público está abajo">
+          <div class="pos"><span>Synths</span><b>David Manrique</b>1 stand de teclado<br>In ears: mono</div>
+          <div class="pos bateria"><span>Batería</span><b>Germán Eternod</b>Shell pack · set de mics<br>DI para interfaz<br>In ears: stereo</div>
+          <div class="pos"><span>Sax</span><b>Misael Pérez</b>Mic lavalier<br>In ears: mono</div>
+          <div class="pos"><span>Guitarra</span><b>Víctor López</b>Amp + mic de amp<br>DI para interfaz · mic vox<br>In ears: mono</div>
+          <div class="pos"><span>Voz · guitarra</span><b>Alejandro Rosales</b>DI para guitarra<br>Mic lead vox<br>In ears: stereo</div>
+          <div class="pos"><span>Bajo</span><b>Emilio Gorozpe</b>DI para bajo · mic vox<br>In ears: mono</div>
+          <div class="publico">público</div>
+        </div>
+
+        <div class="botones">
+          <a class="boton" href="assets/presskit/bba/rider-bam-bam-atom-26-27.pdf" download>Descargar rider (PDF)</a>
+        </div>
+      </section>
+
+      <section class="bloque contacto">
+        <h2>Contacto</h2>
+        <a class="mail" href="mailto:bambamatomic@gmail.com">bambamatomic@gmail.com</a>
+        <ul class="redes">
+          <li><a href="https://www.instagram.com/bambamatom_" target="_blank" rel="noopener">Instagram @bambamatom_</a></li>
+          <li><a href="https://www.tiktok.com/@bambamatom" target="_blank" rel="noopener">TikTok @bambamatom</a></li>
+          <li><a href="https://x.com/bambamatom_" target="_blank" rel="noopener">X @bambamatom_</a></li>
+          <li>Facebook @bambamatom_</li>
+        </ul>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<footer><a href="index.html">saudaji.com</a></footer>
+
+<script>
+/* Saudaji: bio, highlights, música y portafolio se refrescan desde content.json
+   (la misma fuente que index.html y el PDF). Si falla, se queda el HTML de arriba. */
+(function () {
+  function disco(o) {
+    var d = document.createElement('div');
+    d.className = 'disco';
+    var cont = d;
+    if (o.link) {
+      cont = document.createElement('a');
+      cont.href = o.link; cont.target = '_blank'; cont.rel = 'noopener';
+      d.append(cont);
+    }
+    var img = document.createElement('img');
+    img.src = o.cover || ''; img.alt = o.titulo; img.loading = 'lazy';
+    var t = document.createElement('span');
+    t.className = 'titulo'; t.textContent = o.titulo;
+    var det = document.createElement('span');
+    det.className = 'detalle';
+    o.lineas.forEach(function (l, i) {
+      if (i) det.append(document.createElement('br'));
+      det.append(document.createTextNode(l));
+    });
+    cont.append(img, t, det);
+    return d;
+  }
+
+  fetch('content.json', { cache: 'no-store' }).then(function (r) {
+    if (!r.ok) throw 0;
+    return r.json();
+  }).then(function (c) {
+    if (c.bio && c.bio.texto) {
+      var bio = document.getElementById('bio-texto');
+      bio.innerHTML = '';
+      c.bio.texto.split(/\n\s*\n/).forEach(function (parr) {
+        var p = document.createElement('p');
+        p.textContent = parr.trim();
+        bio.append(p);
+      });
+    }
+    if (Array.isArray(c.highlights) && c.highlights.length) {
+      var ul = document.getElementById('highlights');
+      ul.innerHTML = '';
+      c.highlights.forEach(function (h) {
+        var li = document.createElement('li');
+        li.textContent = h;
+        ul.append(li);
+      });
+    }
+    if (Array.isArray(c.musica) && c.musica.length) {
+      var mg = document.getElementById('musica-grid');
+      mg.innerHTML = '';
+      c.musica.forEach(function (m) {
+        mg.append(disco({ titulo: m.titulo, cover: m.cover, link: m.link || m.escuchar,
+                          lineas: [m.formato + (m.año ? ' · ' + m.año : '')] }));
+      });
+    }
+    if (Array.isArray(c.portafolio) && c.portafolio.length) {
+      var tg = document.getElementById('trabajo-grid');
+      tg.innerHTML = '';
+      c.portafolio.forEach(function (p) {
+        tg.append(disco({ titulo: p.titulo, cover: p.cover, link: p.link,
+                          lineas: [(p.artista || '') + (p.año ? ' · ' + p.año : ''), p.rol] }));
+      });
+    }
+    if (c.links && c.links.email) {
+      document.querySelectorAll('#saudaji a[href^="mailto:"]').forEach(function (a) {
+        a.href = a.href.replace(/mailto:[^?]+/, 'mailto:' + c.links.email);
+        if (a.classList.contains('mail')) a.textContent = c.links.email;
+      });
+    }
+  }).catch(function () { /* sin content.json: se queda el HTML de respaldo */ });
+})();
+</script>
+</body>
+</html>
