@@ -152,6 +152,7 @@
     width: 100%; border: 0; border-radius: 12px; display: block;
     background: rgba(0,0,0,0.3);
   }
+  .reproductor + .reproductor { margin-top: 0.8rem; }
   .reproductor + .boton { margin-top: 1.4rem; }
 
   .boton {
@@ -345,25 +346,12 @@
       </section>
 
       <section class="bloque">
-        <h2>Música solista</h2>
-        <div class="discos" id="musica-grid">
-          <div class="disco"><a href="https://open.spotify.com/album/1kG111eh5jam65UXGxneAT" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/01/46/ee/0146ee01-641f-b907-bace-95bb861fb210/artwork.jpg/600x600bb.jpg" alt="☼ ☞ ☺" loading="lazy"><span class="titulo">☼ ☞ ☺</span><span class="detalle">EP · 2025</span></a></div>
-          <div class="disco"><a href="https://open.spotify.com/album/1wuObFqZETqpSlS1EBWMwU" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/b9/50/f9/b950f9e6-a9b9-0803-2dea-2112aa4910eb/artwork.jpg/600x600bb.jpg" alt="RUIDO" loading="lazy"><span class="titulo">RUIDO</span><span class="detalle">Sencillo · 2025</span></a></div>
-          <div class="disco"><a href="https://open.spotify.com/album/1RJ6oxpf6dLtcOiRllG1Wu" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/18/13/78/18137857-40e9-309b-9fe1-6e546b8c588a/artwork.jpg/600x600bb.jpg" alt="tormenta, Callada" loading="lazy"><span class="titulo">tormenta, Callada</span><span class="detalle">EP · 2024</span></a></div>
-        </div>
-      </section>
-
-      <section class="bloque">
-        <h2>Producción · portafolio</h2>
-        <div class="discos" id="trabajo-grid">
-          <div class="disco"><a href="https://music.apple.com/us/album/bam-bam-atom-ep/1687196212" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/05/fe/5a/05fe5a99-40b6-025a-b900-b82807c8d049/artwork.jpg/600x600bb.jpg" alt="BAM BAM ATOM." loading="lazy"><span class="titulo">BAM BAM ATOM.</span><span class="detalle">BAM BAM ATOM. · 2023<br>Producción · Composición</span></a></div>
-          <div class="disco"><a href="https://music.apple.com/us/album/feel-the-groove-single/1721766961" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/4c/2f/4e/4c2f4e41-b5a0-8ee3-1f65-19fd3be7b26d/artwork.jpg/600x600bb.jpg" alt="FEEL the GROOVE." loading="lazy"><span class="titulo">FEEL the GROOVE.</span><span class="detalle">BAM BAM ATOM. · 2024<br>Producción · Mezcla · Composición</span></a></div>
-          <div class="disco"><a href="https://music.apple.com/us/album/eternidad-single/1837010916" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/66/62/89/666289e5-361c-6d18-7f5f-b861cb7ee5b0/0.jpg/600x600bb.jpg" alt="Eternidad" loading="lazy"><span class="titulo">Eternidad</span><span class="detalle">Fer Altuzar · 2025<br>Producción · Composición</span></a></div>
-          <div class="disco"><a href="https://music.apple.com/us/album/por-las-buenas/1718253305" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/9b/65/70/9b657079-71ef-6bcb-0fa2-3c738c8ca85e/8447053031735.jpg/600x600bb.jpg" alt="Por Las Buenas" loading="lazy"><span class="titulo">Por Las Buenas — EP</span><span class="detalle">Doris Anahí · 2023<br>Co-producción · Producción · Composición</span></a></div>
-          <div class="disco"><a href="https://music.apple.com/us/album/1896109578" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/88/68/78/886878a6-2a74-322e-0186-5fe255b40eaf/artwork.jpg/600x600bb.jpg" alt="MAGAMUNDI" loading="lazy"><span class="titulo">MAGAMUNDI</span><span class="detalle">ALONG · 2026<br>Producción · Mezcla · Composición</span></a></div>
-          <div class="disco"><a href="https://music.apple.com/us/album/corto-plazo/6769809077" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/45/28/d3/4528d3bb-9dc6-31ae-7f56-89c7390e23e2/824296638019_cover.jpg/600x600bb.jpg" alt="Corto Plazo" loading="lazy"><span class="titulo">Corto Plazo</span><span class="detalle">FAVZTO · 2026<br>Producción · Mezcla · Masterización</span></a></div>
-          <div class="disco"><img src="assets/covers/persona.jpg" alt="Qué costumbre tan salvaje / DOOMINACIÓN" loading="lazy"><span class="titulo">Qué costumbre tan salvaje / DOOMINACIÓN</span><span class="detalle">PERSONA · 2026<br>Producción · Mezcla · Masterización · Composición</span></div>
-        </div>
+        <h2>Escucha</h2>
+        <!-- los 3 lanzamientos más recientes, del más nuevo al más viejo -->
+        <iframe class="reproductor" src="https://open.spotify.com/embed/track/0Ie6N45MynD1bqge5C9tt6?utm_source=generator&amp;theme=0" height="152" title="(no) me quiero ir — Saudaji" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+        <iframe class="reproductor" src="https://open.spotify.com/embed/track/1QowIWD9UsgEoXF8FMUg1Y?utm_source=generator&amp;theme=0" height="152" title="mucho + — Saudaji" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+        <iframe class="reproductor" src="https://open.spotify.com/embed/album/1kG111eh5jam65UXGxneAT?utm_source=generator&amp;theme=0" height="152" title="☼ ☞ ☺ — Saudaji" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+        <a class="boton" href="https://open.spotify.com/artist/1Y9oaq7o6sWlP4YKM9ohu9" target="_blank" rel="noopener">Abrir en Spotify</a>
       </section>
 
       <section class="bloque">
@@ -374,12 +362,6 @@
         </div>
       </section>
 
-      <section class="bloque">
-        <h2>Escucha</h2>
-        <iframe class="reproductor" src="https://samply.app/embed/d95d5675-e41e-4646-b328-66fade2937b9" height="212" title="Saudaji en Samply" loading="lazy" allow="autoplay" allowfullscreen></iframe>
-        <a class="boton" href="https://samply.app/p/d95d5675-e41e-4646-b328-66fade2937b9?si=kj8WAVyW8mcmOQA3NewVGu4ZH2G3" target="_blank" rel="noopener">Abrir en Samply</a>
-      </section>
-
       <section class="bloque contacto">
         <h2>Contacto</h2>
         <a class="mail" href="mailto:saudaji@saudaji.com">saudaji@saudaji.com</a>
@@ -387,7 +369,7 @@
           <li><a href="https://www.instagram.com/_saudaji" target="_blank" rel="noopener">Instagram @_saudaji</a></li>
           <li><a href="https://www.tiktok.com/@saudaji_" target="_blank" rel="noopener">TikTok @saudaji_</a></li>
           <li><a href="https://x.com/saudaji_" target="_blank" rel="noopener">X @saudaji_</a></li>
-          <li><a href="https://open.spotify.com/album/1wuObFqZETqpSlS1EBWMwU" target="_blank" rel="noopener">Spotify</a></li>
+          <li><a href="https://open.spotify.com/artist/1Y9oaq7o6sWlP4YKM9ohu9" target="_blank" rel="noopener">Spotify</a></li>
           <li><a href="https://saudaji.bandcamp.com/album/-" target="_blank" rel="noopener">Bandcamp</a></li>
         </ul>
         <div class="botones">
@@ -449,7 +431,7 @@
 
       <section class="bloque">
         <h2>Conciertos</h2>
-        <p>A lo largo de 2023–2025, BAM BAM ATOM. se ha presentado con <strong>lleno total</strong> en recintos como <strong>Bajo Circuito, Multiforo 246, La Piedad y Foro Rebel</strong>, además de participar en festivales como <strong>Bahidorá y Wine &amp; Colors</strong>.</p>
+        <p>A lo largo de 2023–2025, BAM BAM ATOM. se ha presentado en recintos como <strong>Bajo Circuito, Multiforo 246, La Piedad y Foro Rebel</strong>, además de participar en festivales como <strong>Bahidorá y Wine &amp; Colors</strong>.</p>
         <div class="carteles">
           <img src="assets/presskit/bba/cartel-madriguera.jpg" alt="Cartel La Madriguera" loading="lazy">
           <img src="assets/presskit/bba/cartel-bambox-piedad.jpg" alt="Cartel BAM BOX en La Piedad" loading="lazy">
@@ -591,32 +573,9 @@
 <footer><a href="index.html">saudaji.com</a></footer>
 
 <script>
-/* Saudaji: bio, highlights, música y portafolio se refrescan desde content.json
+/* Saudaji: bio y highlights se refrescan desde content.json
    (la misma fuente que index.html y el PDF). Si falla, se queda el HTML de arriba. */
 (function () {
-  function disco(o) {
-    var d = document.createElement('div');
-    d.className = 'disco';
-    var cont = d;
-    if (o.link) {
-      cont = document.createElement('a');
-      cont.href = o.link; cont.target = '_blank'; cont.rel = 'noopener';
-      d.append(cont);
-    }
-    var img = document.createElement('img');
-    img.src = o.cover || ''; img.alt = o.titulo; img.loading = 'lazy';
-    var t = document.createElement('span');
-    t.className = 'titulo'; t.textContent = o.titulo;
-    var det = document.createElement('span');
-    det.className = 'detalle';
-    o.lineas.forEach(function (l, i) {
-      if (i) det.append(document.createElement('br'));
-      det.append(document.createTextNode(l));
-    });
-    cont.append(img, t, det);
-    return d;
-  }
-
   fetch('content.json', { cache: 'no-store' }).then(function (r) {
     if (!r.ok) throw 0;
     return r.json();
@@ -637,22 +596,6 @@
         var li = document.createElement('li');
         li.textContent = h;
         ul.append(li);
-      });
-    }
-    if (Array.isArray(c.musica) && c.musica.length) {
-      var mg = document.getElementById('musica-grid');
-      mg.innerHTML = '';
-      c.musica.forEach(function (m) {
-        mg.append(disco({ titulo: m.titulo, cover: m.cover, link: m.link || m.escuchar,
-                          lineas: [m.formato + (m.año ? ' · ' + m.año : '')] }));
-      });
-    }
-    if (Array.isArray(c.portafolio) && c.portafolio.length) {
-      var tg = document.getElementById('trabajo-grid');
-      tg.innerHTML = '';
-      c.portafolio.forEach(function (p) {
-        tg.append(disco({ titulo: p.titulo, cover: p.cover, link: p.link,
-                          lineas: [(p.artista || '') + (p.año ? ' · ' + p.año : ''), p.rol] }));
       });
     }
     if (c.links && c.links.email) {
