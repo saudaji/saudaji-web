@@ -284,9 +284,11 @@
   @media (max-width: 560px) {
     .barra nav { gap: 0.9rem; }
     .barra .inicio { display: none; }
-    .escenario { grid-template-columns: 1fr 1fr; }
-    .escenario .bateria { grid-column: 1 / -1; grid-row: 1; }
-    .escenario .centro ~ .pos { grid-row: auto; }
+    /* en celular el plot mantiene sus 3 columnas (que nadie se vea "más adelante") */
+    .escenario { gap: 0.4rem; padding: 0.5rem; font-size: 10.5px; }
+    .escenario .pos { padding: 0.55rem 0.45rem; overflow-wrap: anywhere; }
+    .escenario .pos b { font-size: 11px; }
+    .escenario .pos span { font-size: 9px; letter-spacing: 0.08em; }
   }
 </style>
 </head>
