@@ -14,8 +14,8 @@
   /* Dos bloques, uno por artista, cada uno con su foto de fondo fija
      (.fondo es sticky: funciona también en iPhone, a diferencia de
      background-attachment: fixed). Entre los dos, una línea delgada con
-     el nombre de BAM BAM ATOM. El texto de Saudaji se refresca desde
-     content.json (igual que index.html); el HTML de abajo es el respaldo. */
+     el nombre de BAM BAM ATOM. Todo el texto es fijo en este archivo (no lee
+     content.json: aquí la bio va sin la parte de producción). */
   :root {
     --naranja: #ff6700;      /* logo de Saudaji */
     --amarillo: #f5c97a;     /* acento del EPK de BAM BAM ATOM. */
@@ -334,15 +334,12 @@
         <h2>Bio</h2>
         <div id="bio-texto">
           <p>Saudaji es el proyecto solista de Santiago Tejeda — productor, compositor, ingeniero de audio y diseñador con base en Ciudad de México. Hace música desde los 18 años y se mueve entre el neofolk, el pop alternativo y las texturas orgánicas, buscando siempre otras formas de producir y componer: canciones que suenan a cuarto, a campo y a máquina al mismo tiempo.</p>
-          <p>Como solista ha publicado los EPs «tormenta, Callada» (2024) y «☼ ☞ ☺» (2025), además del sencillo «RUIDO» (2025), todos producidos, grabados y mezclados por él mismo bajo una ética DIY. Su música retrata la ansiedad y la belleza de lo cotidiano con un enfoque honesto y artesanal.</p>
-          <p>Fuera de su proyecto es productor e ingeniero de audio, y socio y dueño de Sagredo Estudio, donde ha colaborado con artistas clave de la escena alternativa mexicana como Wet Baes, ALONG y Los Milagro. Ha tocado en más de la mitad del país y en Los Ángeles, consolidándose como parte de la nueva ola del pop independiente mexicano.</p>
+          <p>Como solista ha publicado los EPs «tormenta, Callada» (2024) y «☼ ☞ ☺» (2025), además del sencillo «RUIDO» (2025), todos producidos, grabados y mezclados por él mismo bajo una ética DIY. En 2026 lanzó los sencillos «mucho +» y «(no) me quiero ir». Su música retrata la ansiedad y la belleza de lo cotidiano con un enfoque honesto y artesanal.</p>
+          <p>Ha tocado en más de la mitad del país y en Los Ángeles, consolidándose como parte de la nueva ola del pop independiente mexicano.</p>
         </div>
         <h3>Highlights</h3>
         <ul class="highlights" id="highlights">
-          <li>Productor, compositor e ingeniero de audio. Socio y dueño de Sagredo Estudio en CDMX.</li>
-          <li>Shows y colaboraciones con Los Milagro, ALONG, Wet Baes, Daniel Quién y BAM BAM ATOM., entre otros.</li>
-          <li>Grabaciones con ALONG, Ivana, Doris Anahí, Rafa Arreguín, Fer Altuzar, Ahora Juntos, Disco Bahía y Enzo Marcelo, entre otros.</li>
-          <li>Producciones para ALONG, Fer Altuzar, BAM BAM ATOM., Doris Anahí y Ramona Vee, entre otros.</li>
+          <li>Shows con Los Milagro, ALONG, Wet Baes y Daniel Quién, entre otros.</li>
           <li>Presencia en Ibero 90.9 · presentaciones en México y Los Ángeles.</li>
         </ul>
       </section>
@@ -630,40 +627,5 @@
 
 <footer><a href="index.html">saudaji.com</a></footer>
 
-<script>
-/* Saudaji: bio y highlights se refrescan desde content.json
-   (la misma fuente que index.html y el PDF). Si falla, se queda el HTML de arriba. */
-(function () {
-  fetch('content.json', { cache: 'no-store' }).then(function (r) {
-    if (!r.ok) throw 0;
-    return r.json();
-  }).then(function (c) {
-    if (c.bio && c.bio.texto) {
-      var bio = document.getElementById('bio-texto');
-      bio.innerHTML = '';
-      c.bio.texto.split(/\n\s*\n/).forEach(function (parr) {
-        var p = document.createElement('p');
-        p.textContent = parr.trim();
-        bio.append(p);
-      });
-    }
-    if (Array.isArray(c.highlights) && c.highlights.length) {
-      var ul = document.getElementById('highlights');
-      ul.innerHTML = '';
-      c.highlights.forEach(function (h) {
-        var li = document.createElement('li');
-        li.textContent = h;
-        ul.append(li);
-      });
-    }
-    if (c.links && c.links.email) {
-      document.querySelectorAll('#saudaji a[href^="mailto:"]').forEach(function (a) {
-        a.href = a.href.replace(/mailto:[^?]+/, 'mailto:' + c.links.email);
-        if (a.classList.contains('mail')) a.textContent = c.links.email;
-      });
-    }
-  }).catch(function () { /* sin content.json: se queda el HTML de respaldo */ });
-})();
-</script>
 </body>
 </html>
