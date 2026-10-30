@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAUDAJI — Escucha</title>
+<meta name="description" content="Lo más nuevo de Saudaji: (no) me quiero ir, mucho + y ☼︎ ☞︎ ☺︎. Escúchalo en Spotify, Apple Music, YouTube Music o Deezer.">
+<meta property="og:type" content="music.playlist">
+<meta property="og:title" content="Saudaji — Escucha">
+<meta property="og:description" content="(no) me quiero ir · mucho + · ☼︎ ☞︎ ☺︎ — en tu plataforma favorita.">
+<meta property="og:image" content="https://saudaji.com/assets/covers/no-me-quiero-ir.jpg">
+<meta property="og:url" content="https://saudaji.com/escucha">
+<meta name="twitter:card" content="summary">
+<style>
+  /* Página suelta para compartir (bio de Instagram, TikTok, etc.): los 3 lanzamientos
+     más recientes, del más nuevo al más viejo, con link a cada plataforma.
+     Sin JS se ven los 4 links de cada lanzamiento. Con JS aparece "¿Dónde escuchas?":
+     se elige una plataforma y cada lanzamiento muestra un solo botón grande.
+     La elección se recuerda en el navegador, y ?p=apple (spotify, apple, youtube,
+     deezer) en el link abre la página con esa plataforma ya elegida.
+     Para cambiar un lanzamiento: edita su <article> (portada en assets/covers/).
+     Si a un lanzamiento le falta una plataforma, no pongas ese <a>: el botón cae
+     a Spotify y avisa que todavía no está ahí. */
+  :root {
+    --tinta: #1a1a1a;
+    --tinta-suave: rgba(26, 26, 26, 0.55);
+    --linea: rgba(26, 26, 26, 0.18);
+    --bg: #ffffff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--tinta);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  .home { position: fixed; top: 1.6rem; left: 2rem; z-index: 3; }
+  .home img { width: 150px; height: auto; display: block; }
+
+  main {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 9rem 1.5rem 4rem;
+    text-align: center;
+  }
+  h1 { font-size: 13px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 0.2rem; }
+  .sub { font-size: 15px; font-weight: 300; color: var(--tinta-suave); }
+
+  /* ---------- ¿dónde escuchas? (solo con JS) ---------- */
+  .selector { display: none; margin-top: 2.4rem; }
+  .con-selector .selector { display: block; }
+  .selector p {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--tinta-suave);
+    margin-bottom: 0.6rem;
+  }
+  .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.45rem; }
+  .chips button {
+    background: #fff;
+    color: var(--tinta);
+    border: 1px solid var(--linea);
+    border-radius: 999px;
+    font: inherit;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.45rem 0.9rem;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, color 0.2s;
+  }
+  .chips button:hover { border-color: var(--tinta); }
+  .chips button[aria-pressed="true"] { background: var(--tinta); border-color: var(--tinta); color: #fff; }
+
+  /* ---------- lanzamientos ---------- */
+  .lanzamiento { margin-top: 3.5rem; }
+  .portada { display: block; }
+  .portada img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    display: block;
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.16);
+    transition: opacity 0.3s;
+  }
+  .portada:hover img { opacity: 0.88; }
+  .lanzamiento h2 { font-size: 17px; font-weight: 400; margin-top: 1.2rem; line-height: 1.3; }
+  .detalle { font-size: 11px; color: var(--tinta-suave); letter-spacing: 0.05em; margin-top: 0.2rem; }
+
+  /* sin JS: los 4 links en fila */
+  .links { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.45rem; margin-top: 1rem; }
+  .links a {
+    border: 1px solid var(--linea);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.45rem 0.8rem;
+    transition: border-color 0.2s;
+  }
+  .links a:hover { border-color: var(--tinta); }
+
+  /* con JS: un solo botón grande, el de la plataforma elegida */
+  .con-selector .links a { display: none; }
+  .con-selector .links a.activo {
+    display: block;
+    width: 100%;
+    background: var(--tinta);
+    color: #fff;
+    border-color: var(--tinta);
+    letter-spacing: 0.3em;
+    padding: 1rem;
+    transition: background 0.3s, color 0.3s;
+  }
+  .con-selector .links a.activo::before { content: "Escuchar en "; }
+  .con-selector .links a.activo:hover { background: #fff; color: var(--tinta); }
+  .aviso { min-height: 0; font-size: 12px; color: var(--tinta-suave); margin-top: 0.5rem; }
+  .aviso:empty { display: none; }
+
+  .video {
+    display: inline-block;
+    margin-top: 0.9rem;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--tinta-suave);
+    border-bottom: 1px solid var(--linea);
+    transition: color 0.3s, border-color 0.3s;
+  }
+  .video:hover { color: var(--tinta); border-color: var(--tinta); }
+
+  /* ---------- pie ---------- */
+  .tambien { margin-top: 4rem; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--tinta-suave); }
+  .tambien a { border-bottom: 1px solid var(--linea); margin: 0 0.5rem; transition: color 0.3s, border-color 0.3s; }
+  .tambien a:hover { color: var(--tinta); border-color: var(--tinta); }
+
+  .volver {
+    display: inline-block;
+    margin-top: 2.5rem;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--tinta-suave);
+    border-bottom: 1px solid var(--linea);
+  }
+
+  @media (max-width: 600px) {
+    .home { left: 1.2rem; top: 1.2rem; }
+    .home img { width: 120px; }
+    main { padding: 7rem 1.4rem 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<a class="home" href="index.html" aria-label="Volver a saudaji.com"><img src="assets/logo.svg" alt="Saudaji"></a>
+
+<main>
+  <h1>Escucha</h1>
+  <p class="sub">Lo más nuevo de Saudaji</p>
+
+  <div class="selector">
+    <p id="selector-titulo">¿Dónde escuchas?</p>
+    <div class="chips" role="group" aria-labelledby="selector-titulo">
+      <button type="button" data-p="spotify">Spotify</button>
+      <button type="button" data-p="apple">Apple Music</button>
+      <button type="button" data-p="youtube">YouTube Music</button>
+      <button type="button" data-p="deezer">Deezer</button>
+    </div>
+  </div>
+
+  <!-- del más nuevo al más viejo -->
+  <article class="lanzamiento">
+    <a class="portada" href="https://open.spotify.com/track/0Ie6N45MynD1bqge5C9tt6" target="_blank" rel="noopener"><img src="assets/covers/no-me-quiero-ir.jpg" alt="Portada de (no) me quiero ir"></a>
+    <h2>(no) me quiero ir</h2>
+    <p class="detalle">Sencillo · 2026</p>
+    <div class="links">
+      <a data-p="spotify" href="https://open.spotify.com/track/0Ie6N45MynD1bqge5C9tt6" target="_blank" rel="noopener">Spotify</a>
+      <a data-p="apple" href="https://music.apple.com/mx/album/no-me-quiero-ir-single/6814931922" target="_blank" rel="noopener">Apple Music</a>
+      <a data-p="youtube" href="https://music.youtube.com/playlist?list=OLAK5uy_lyE1l6if4-7RD_e9rDXpFCLaaEtqX61So" target="_blank" rel="noopener">YouTube Music</a>
+      <a data-p="deezer" href="https://www.deezer.com/album/1102368232" target="_blank" rel="noopener">Deezer</a>
+    </div>
+    <p class="aviso"></p>
+    <a class="video" href="https://www.youtube.com/watch?v=6jJLObXsPPg" target="_blank" rel="noopener">Ver el video oficial ↗</a>
+  </article>
+
+  <article class="lanzamiento">
+    <a class="portada" href="https://open.spotify.com/track/1QowIWD9UsgEoXF8FMUg1Y" target="_blank" rel="noopener"><img src="assets/covers/mucho-mas.jpg" alt="Portada de mucho +" loading="lazy"></a>
+    <h2>mucho +</h2>
+    <p class="detalle">Sencillo · 2026</p>
+    <div class="links">
+      <a data-p="spotify" href="https://open.spotify.com/track/1QowIWD9UsgEoXF8FMUg1Y" target="_blank" rel="noopener">Spotify</a>
+      <a data-p="apple" href="https://music.apple.com/mx/album/mucho-single/6803281026" target="_blank" rel="noopener">Apple Music</a>
+      <a data-p="deezer" href="https://www.deezer.com/album/1058446352" target="_blank" rel="noopener">Deezer</a>
+    </div>
+    <p class="aviso"></p>
+  </article>
+
+  <article class="lanzamiento">
+    <a class="portada" href="https://open.spotify.com/album/1kG111eh5jam65UXGxneAT" target="_blank" rel="noopener"><img src="assets/covers/sol-mano-sonrisa.jpg" alt="Portada de ☼︎ ☞︎ ☺︎" loading="lazy"></a>
+    <h2>☼︎ ☞︎ ☺︎</h2>
+    <p class="detalle">EP · 4 canciones · 2025</p>
+    <div class="links">
+      <a data-p="spotify" href="https://open.spotify.com/album/1kG111eh5jam65UXGxneAT" target="_blank" rel="noopener">Spotify</a>
+      <a data-p="apple" href="https://music.apple.com/mx/album/ep/6770153862" target="_blank" rel="noopener">Apple Music</a>
+      <a data-p="youtube" href="https://music.youtube.com/browse/MPREb_FW7lDiCJIud" target="_blank" rel="noopener">YouTube Music</a>
+      <a data-p="deezer" href="https://www.deezer.com/album/981466691" target="_blank" rel="noopener">Deezer</a>
+    </div>
+    <p class="aviso"></p>
+  </article>
+
+  <p class="tambien">También en
+    <a href="https://saudaji.bandcamp.com" target="_blank" rel="noopener">Bandcamp</a>
+    <a href="https://soundcloud.com/santiiiiiiiii" target="_blank" rel="noopener">SoundCloud</a>
+  </p>
+
+  <a class="volver" href="index.html">← saudaji.com</a>
+</main>
+
+<script>
+(function () {
+  var CLAVE = 'saudaji-plataforma';
+  var NOMBRES = { spotify: 'Spotify', apple: 'Apple Music', youtube: 'YouTube Music', deezer: 'Deezer' };
+  var chips = document.querySelectorAll('.chips button');
+
+  function elegir(p) {
+    if (!NOMBRES[p]) p = 'spotify';
+    chips.forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.p === p ? 'true' : 'false'); });
+    document.querySelectorAll('.lanzamiento').forEach(function (l) {
+      var links = l.querySelectorAll('.links a');
+      var link = l.querySelector('.links a[data-p="' + p + '"]');
+      var aviso = l.querySelector('.aviso');
+      aviso.textContent = link ? '' : 'Todavía no está en ' + NOMBRES[p] + '.';
+      link = link || l.querySelector('.links a[data-p="spotify"]');
+      links.forEach(function (a) { a.classList.toggle('activo', a === link); });
+      l.querySelector('.portada').href = link.href;
+    });
+  }
+
+  var guardada = null;
+  try { guardada = localStorage.getItem(CLAVE); } catch (e) {}
+  var deLink = new URLSearchParams(location.search).get('p');
+
+  chips.forEach(function (b) {
+    b.addEventListener('click', function () {
+      elegir(b.dataset.p);
+      try { localStorage.setItem(CLAVE, b.dataset.p); } catch (e) {}
+    });
+  });
+
+  document.body.classList.add('con-selector');
+  elegir(deLink || guardada || 'spotify');
+})();
+</script>
+</body>
+</html>
