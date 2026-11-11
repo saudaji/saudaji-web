@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SAUDAJI — Escucha</title>
 <meta name="description" content="Lo más nuevo de Saudaji: (no) me quiero ir, mucho + y ☼︎ ☞︎ ☺︎. Escúchalo en Spotify, Apple Music, YouTube Music o Deezer.">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <meta property="og:type" content="music.playlist">
 <meta property="og:title" content="Saudaji — Escucha">
 <meta property="og:description" content="(no) me quiero ir · mucho + · ☼︎ ☞︎ ☺︎ — en tu plataforma favorita.">
@@ -23,7 +26,7 @@
      a Spotify y avisa que todavía no está ahí. */
   :root {
     --tinta: #1a1a1a;
-    --tinta-suave: rgba(26, 26, 26, 0.55);
+    --tinta-suave: rgba(26, 26, 26, 0.62);  /* 0.62 = contraste 4.9:1 sobre blanco */
     --linea: rgba(26, 26, 26, 0.18);
     --bg: #ffffff;
   }
@@ -71,7 +74,7 @@
     font-size: 11px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    padding: 0.45rem 0.9rem;
+    padding: 0.6rem 0.9rem;
     cursor: pointer;
     transition: border-color 0.2s, background 0.2s, color 0.2s;
   }
@@ -149,8 +152,14 @@
     border-bottom: 1px solid var(--linea);
   }
 
+  /* área táctil cómoda (~44px) sin mover nada: una zona invisible alrededor del link */
+  .volver, .video, .tambien a { position: relative; }
+  .volver::after, .video::after { content: ""; position: absolute; inset: -0.75rem -0.6rem; }
+  .tambien a::after { content: ""; position: absolute; inset: -0.9rem -0.25rem; }
+
   @media (max-width: 600px) {
-    .home { left: 1.2rem; top: 1.2rem; }
+    /* en celular el logo se queda arriba, no flota encima de las portadas al bajar */
+    .home { position: absolute; left: 1.2rem; top: 1.2rem; }
     .home img { width: 120px; }
     main { padding: 7rem 1.4rem 3rem; }
   }
@@ -176,7 +185,7 @@
 
   <!-- del más nuevo al más viejo -->
   <article class="lanzamiento">
-    <a class="portada" href="https://open.spotify.com/track/0Ie6N45MynD1bqge5C9tt6" target="_blank" rel="noopener"><img src="assets/covers/no-me-quiero-ir.jpg" alt="Portada de (no) me quiero ir"></a>
+    <a class="portada" href="https://open.spotify.com/track/0Ie6N45MynD1bqge5C9tt6" target="_blank" rel="noopener"><img src="assets/covers/no-me-quiero-ir.webp" alt="Portada de (no) me quiero ir"></a>
     <h2>(no) me quiero ir</h2>
     <p class="detalle">Sencillo · 2026</p>
     <div class="links">
@@ -190,7 +199,7 @@
   </article>
 
   <article class="lanzamiento">
-    <a class="portada" href="https://open.spotify.com/track/1QowIWD9UsgEoXF8FMUg1Y" target="_blank" rel="noopener"><img src="assets/covers/mucho-mas.jpg" alt="Portada de mucho +" loading="lazy"></a>
+    <a class="portada" href="https://open.spotify.com/track/1QowIWD9UsgEoXF8FMUg1Y" target="_blank" rel="noopener"><img src="assets/covers/mucho-mas.webp" alt="Portada de mucho +" loading="lazy"></a>
     <h2>mucho +</h2>
     <p class="detalle">Sencillo · 2026</p>
     <div class="links">
@@ -202,7 +211,7 @@
   </article>
 
   <article class="lanzamiento">
-    <a class="portada" href="https://open.spotify.com/album/1kG111eh5jam65UXGxneAT" target="_blank" rel="noopener"><img src="assets/covers/sol-mano-sonrisa.jpg" alt="Portada de ☼︎ ☞︎ ☺︎" loading="lazy"></a>
+    <a class="portada" href="https://open.spotify.com/album/1kG111eh5jam65UXGxneAT" target="_blank" rel="noopener"><img src="assets/covers/sol-mano-sonrisa.webp" alt="Portada de ☼︎ ☞︎ ☺︎" loading="lazy"></a>
     <h2>☼︎ ☞︎ ☺︎</h2>
     <p class="detalle">EP · 4 canciones · 2025</p>
     <div class="links">

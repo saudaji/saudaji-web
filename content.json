@@ -39,17 +39,19 @@
     }
   ],
   "evento": {
-    "titulo": "En vivo en Sagredo",
-    "fecha": "26 de septiembre · 8:30 pm",
-    "lugar": "Sagredo · con Desarma",
-    "texto": "Entrada GRATIS con registro. Apúntate y te mando los detalles de acceso.",
-    "cta": "Apartar mi lugar",
-    "cartel": "assets/cartel-26sept.jpg",
-    "extra": "PD: ese día también es mi cumpleaños 🎂 — vente a celebrar.",
-    "registro_cerrado": true,
-    "mensaje_cerrado": "El registro ya cerró. Si te apuntaste, revisa tu correo: ahí van los detalles de acceso.",
+    "_ayuda": "Esto alimenta concierto.html. SIN show anunciado: deja \"fecha\" vacía y la página muestra sin_fecha_titulo + la barra de correo. PARA ANUNCIAR un show: llena titulo, fecha, lugar, texto y cta (cartel y extra son opcionales; el cartel va en assets/). Cuando se llene, pon registro_cerrado en true y escribe mensaje_cerrado.",
+    "titulo": "",
+    "fecha": "",
+    "lugar": "",
+    "texto": "",
+    "cta": "",
+    "cartel": "",
+    "extra": "",
+    "registro_cerrado": false,
+    "mensaje_cerrado": "",
+    "sin_fecha_titulo": "Próximas fechas pronto",
     "futuras_titulo": "Pon tu email para futuras fechas",
-    "futuras_nota": "(próximo mes — prepárate)",
+    "futuras_nota": "",
     "futuras_cta": "Avísame",
     "futuras_gracias": "Listo, te aviso primero de la próxima fecha. 🌿"
   },
@@ -57,7 +59,7 @@
     "instagram": "https://www.instagram.com/_saudaji",
     "x": "https://x.com/saudaji_",
     "tiktok": "https://www.tiktok.com/@saudaji_",
-    "spotify": "https://open.spotify.com/album/1wuObFqZETqpSlS1EBWMwU",
+    "spotify": "https://open.spotify.com/artist/1Y9oaq7o6sWlP4YKM9ohu9",
     "soundcloud": "https://soundcloud.com/santiiiiiiiii",
     "bandcamp": "https://saudaji.bandcamp.com/album/-",
     "web": "https://saudaji.com",
@@ -125,6 +127,15 @@
       "año": "2026",
       "cover": "assets/covers/persona.jpg",
       "link": "",
+      "descripcion": ""
+    },
+    {
+      "titulo": "La flor",
+      "artista": "Tuzeint",
+      "rol": "Producción · Composición",
+      "año": "2026",
+      "cover": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/71/1a/bb/711abb51-67f7-746f-8688-d4f3e4ec2fb8/823375545217_Cover.jpg/600x600bb.jpg",
+      "link": "https://music.apple.com/mx/album/la-flor/6824664212?i=6824664429",
       "descripcion": ""
     }
   ]

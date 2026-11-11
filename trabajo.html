@@ -5,13 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SAUDAJI — Trabajemos juntos</title>
 <meta name="description" content="Producción, mezcla, master o composición para tu proyecto. Cuéntame qué necesitas.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SAUDAJI">
+<meta property="og:title" content="SAUDAJI — Trabajemos juntos">
+<meta property="og:description" content="Producción, mezcla, master o composición para tu proyecto. Cuéntame qué necesitas.">
+<meta property="og:image" content="https://saudaji.com/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://saudaji.com/trabajo">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <style>
   /* Página suelta con solo el cuestionario de TRABAJO (link directo para compartir).
      Mismo formulario y mismo Google Form que la sección Contacto de index.html.
-     Al enviar, se cambia el cuestionario por la foto del caballo (assets/caballo.jpg). */
+     Al enviar, se cambia el cuestionario por la foto del caballo (assets/caballo.webp). */
   :root {
     --tinta: #1a1a1a;
-    --tinta-suave: rgba(26, 26, 26, 0.55);
+    --tinta-suave: rgba(26, 26, 26, 0.62);  /* 0.62 = contraste 4.9:1 sobre blanco */
     --linea: rgba(26, 26, 26, 0.18);
     --bg: #ffffff;
   }
@@ -56,7 +68,7 @@
     border: 1px solid var(--linea);
     color: var(--tinta);
     font: inherit;
-    font-size: 15px;
+    font-size: 16px;   /* 16px mínimo: con menos, Safari en iPhone hace zoom al tocar el campo */
     padding: 0.7rem 0.8rem;
     border-radius: 0;
   }
@@ -98,8 +110,13 @@
     border-bottom: 1px solid var(--linea);
   }
 
+  /* área táctil cómoda (~44px) sin mover nada: una zona invisible alrededor del link */
+  .volver { position: relative; }
+  .volver::after { content: ""; position: absolute; inset: -0.75rem -0.6rem; }
+
   @media (max-width: 600px) {
-    .home { left: 1.2rem; top: 1.2rem; }
+    /* en celular el logo se queda arriba, no flota encima del contenido al bajar */
+    .home { position: absolute; left: 1.2rem; top: 1.2rem; }
     .home img { width: 120px; }
     main { padding: 7rem 1.4rem 3rem; }
   }
@@ -154,7 +171,7 @@
   </div>
 
   <div class="listo">
-    <img src="assets/caballo.jpg" alt="Un caballo con lentes frente a una laptop">
+    <img src="assets/caballo.webp" alt="Un caballo con lentes frente a una laptop" loading="lazy" width="1024" height="1536">
   </div>
 
   <a class="volver" href="index.html">← saudaji.com</a>
@@ -172,9 +189,11 @@
   var C_TEL = 'entry.401038771';
   var C_CORREO = 'entry.176961981';
 
-  new Image().src = 'assets/caballo.jpg';   // precarga, para que salga al instante
 
   var form = document.getElementById('form-trabajo');
+  // la foto del final se precarga cuando alguien toca el formulario: sale al instante
+  // al enviar, y quien solo mira la página no la descarga
+  form.addEventListener('focusin', function () { new Image().src = 'assets/caballo.webp'; }, { once: true });
   var estado = form.querySelector('.fc-estado');
 
   function validar() {

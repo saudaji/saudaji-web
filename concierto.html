@@ -3,16 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SAUDAJI — Concierto</title>
-<meta name="description" content="Pre-regístrate al próximo concierto de Saudaji. Entérate primero: fecha, lugar y boletos.">
+<title>SAUDAJI — Fechas</title>
+<meta name="description" content="Próximas fechas de Saudaji. Deja tu correo y entérate primero.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SAUDAJI">
+<meta property="og:title" content="SAUDAJI — Fechas">
+<meta property="og:description" content="Próximas fechas de Saudaji. Deja tu correo y entérate primero.">
+<meta property="og:image" content="https://saudaji.com/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://saudaji.com/concierto">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <style>
-  /* Página aparte para el pre-registro de un concierto (no es parte de index.html).
+  /* Página aparte para las fechas en vivo (no es parte de index.html). Tiene dos modos,
+     según el bloque "evento" de content.json:
+     · SIN FECHA (evento.fecha vacío): «Próximas fechas pronto» + barra para dejar el correo.
+     · CON SHOW (evento.fecha lleno): cartel, datos y pre-registro; con registro_cerrado
+       en true se cambia el formulario por el aviso de cierre + la barra de correo.
      Junta correos en un Google Form (hoja de saudaji@saudaji.com). Mismo look que el sitio:
-     blanco + canvas de fotos que parpadean. Datos del evento salen de content.json. */
+     blanco + canvas de fotos que parpadean. */
   :root {
     --verde: #3c795c;
     --tinta: #1a1a1a;
-    --tinta-suave: rgba(26, 26, 26, 0.55);
+    --tinta-suave: rgba(26, 26, 26, 0.62);  /* 0.62 = contraste 4.9:1 sobre blanco */
     --linea: rgba(26, 26, 26, 0.18);
     --bg: #ffffff;
   }
@@ -122,7 +138,7 @@
     border: 1px solid var(--linea);
     color: var(--tinta);
     font: inherit;
-    font-size: 15px;
+    font-size: 16px;   /* 16px mínimo: con menos, Safari en iPhone hace zoom al tocar el campo */
     padding: 0.75rem 0.85rem;
   }
   .campo input:focus { outline: none; border-color: var(--tinta); }
@@ -168,19 +184,25 @@
   /* estado de éxito: oculta el form y muestra un gracias */
   .gracias { display: none; }
   body.enviado form, body.enviado .texto { display: none; }
-  /* registro cerrado (evento.registro_cerrado en content.json): sin form, solo el aviso.
-     Mientras carga content.json el form va oculto, para que no se asome si está cerrado. */
-  body.cargando #form-tokin { visibility: hidden; }
+  /* Mientras carga content.json no se pinta nada del contenido, para que no se asome
+     un modo y luego brinque al otro. */
+  body.cargando main { visibility: hidden; }
+  /* sin fecha anunciada (modo por defecto): solo el título y la barra de correo */
+  body.sin-fecha #form-tokin, body.sin-fecha .texto { display: none; }
+  /* registro cerrado (evento.registro_cerrado en content.json): sin form, solo el aviso */
   .cerrado { display: none; }
   body.registro-cerrado #form-tokin, body.registro-cerrado .texto { display: none; }
   body.registro-cerrado .cerrado { display: block; font-size: 17px; font-weight: 300; margin: 1rem auto 0; max-width: 360px; text-shadow: 0 0 8px #fff, 0 0 8px #fff; }
-  /* barra "futuras fechas": solo aparece con el registro cerrado */
+  /* barra "futuras fechas": aparece sin fecha anunciada o con el registro cerrado */
   .futuras { display: none; margin: 2.2rem auto 0; max-width: 400px; }
-  body.registro-cerrado .futuras { display: block; }
+  body.sin-fecha .futuras, body.registro-cerrado .futuras { display: block; }
+  body.sin-fecha .futuras { margin-top: 1.4rem; }
   .futuras h2 { font-size: 13px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 0.2rem; text-shadow: 0 0 6px #fff, 0 0 6px #fff; }
   .futuras .nota-futuras { font-size: 13px; color: #d9541f; margin-bottom: 0.9rem; text-shadow: 0 0 6px #fff, 0 0 6px #fff; }
+  .futuras .nota-futuras:empty { display: none; }
+  .futuras .nota-futuras:empty + form { margin-top: 0.9rem; }
   .futuras .barra { display: flex; border: 1px solid var(--tinta); background: #fff; }
-  .futuras .barra input { flex: 1; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 15px; padding: 0.8rem 0.85rem; color: var(--tinta); }
+  .futuras .barra input { flex: 1; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 16px; padding: 0.8rem 0.85rem; color: var(--tinta); }
   .futuras .barra input:focus { outline: none; }
   .futuras .barra.error { border-color: #d92b2b; }
   .futuras .barra button { width: auto; margin: 0; flex: none; padding: 0 1.2rem; }
@@ -189,14 +211,21 @@
   .futuras.listo .ok-futuras { display: block; }
   body.enviado .gracias { display: block; font-size: 17px; font-weight: 300; margin: 1rem auto 0; max-width: 360px; text-shadow: 0 0 8px #fff, 0 0 8px #fff; }
 
+  /* área táctil cómoda (~44px) sin mover nada: una zona invisible alrededor del link */
+  .volver { position: relative; }
+  .volver::after { content: ""; position: absolute; inset: -0.75rem -0.6rem; }
+
   @media (max-width: 600px) {
-    .home { left: 1.2rem; top: 1.2rem; }
+    /* en celular el logo se queda arriba, no flota encima del contenido al bajar */
+    .home { position: absolute; left: 1.2rem; top: 1.2rem; }
     .home img { width: 120px; }
     main { padding: 6.5rem 1.4rem 3rem; }
   }
 </style>
+<!-- sin JS no hay content.json que esperar: se muestra el modo sin fecha -->
+<noscript><style>body.cargando main { visibility: visible; }</style></noscript>
 </head>
-<body class="cargando">
+<body class="cargando sin-fecha">
 
 <div id="fondo-capa" aria-hidden="true"><div id="collage"></div></div>
 
@@ -204,8 +233,8 @@
 
 <main>
   <img id="ev-cartel" class="cartel" alt="Cartel del concierto" hidden>
-  <p class="kicker">Pre-registro</p>
-  <h1 id="ev-titulo">Próximo concierto</h1>
+  <p class="kicker">Fechas</p>
+  <h1 id="ev-titulo">Próximas fechas pronto</h1>
   <p class="detalle" id="ev-detalle"></p>
   <p class="texto" id="ev-texto">Apúntate y entérate primero: fecha, lugar, boletos y acceso.</p>
   <p class="extra" id="ev-extra" hidden></p>
@@ -231,7 +260,7 @@
 
   <div class="futuras" id="futuras">
     <h2 id="fut-titulo">Pon tu email para futuras fechas</h2>
-    <p class="nota-futuras" id="fut-nota">(próximo mes — prepárate)</p>
+    <p class="nota-futuras" id="fut-nota"></p>
     <form id="form-futuras" novalidate>
       <div class="barra">
         <input id="f-email" type="email" required autocomplete="email" inputmode="email" placeholder="tu@correo.com" aria-label="Tu correo">
@@ -254,12 +283,17 @@
 (function () {
   var VISIBLES = window.innerWidth < 700 ? 5 : 10;
   var VIDA_MIN = 2800, VIDA_MAX = 6500, FADE = 3000, TAM_MIN = 42, TAM_MAX = 100;
+  var RESERVA = window.innerWidth < 700 ? 20 : 40;   // fotos distintas por visita: tope de datos (~14 KB c/u)
   var cont = document.getElementById('collage');
   if (!cont) return;
+  // sin fotos si la persona pidió menos movimiento o ahorro de datos
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (navigator.connection && navigator.connection.saveData) return;
   var rnd = function (a, b) { return a + Math.random() * (b - a); };
   var fotos = [];
   function spawn() {
     if (!fotos.length) return;
+    if (document.hidden) { setTimeout(spawn, 2000); return; }   // pestaña en segundo plano: espera
     var img = document.createElement('img');
     img.className = 'foto';
     img.src = 'assets/fuji/' + fotos[Math.floor(Math.random() * fotos.length)];
@@ -276,40 +310,54 @@
     }, rnd(VIDA_MIN, VIDA_MAX));
   }
   fetch('assets/fuji/manifest.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); })
-    .then(function (l) { fotos = l; for (var i = 0; i < VISIBLES; i++) setTimeout(spawn, rnd(0, 2600)); })
+    .then(function (l) {
+      fotos = l.slice().sort(function () { return Math.random() - 0.5; }).slice(0, RESERVA);
+      for (var i = 0; i < VISIBLES; i++) setTimeout(spawn, rnd(0, 2600));
+    })
     .catch(function () {});
 })();
 
-/* ---------- datos del evento desde content.json ---------- */
+/* ---------- datos del evento desde content.json ----------
+   Sin evento.fecha la página se queda en modo "sin fecha" (el HTML tal cual).
+   Con evento.fecha pasa a modo show: cartel, datos y pre-registro. */
 var EMAIL = 'saudaji@saudaji.com';
 (function () {
+  function poner(id, txt) { if (txt) document.getElementById(id).textContent = txt; }
   fetch('content.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (c) {
     if (c.links && c.links.email) EMAIL = c.links.email;
     var e = c.evento || {};
-    if (e.titulo) document.getElementById('ev-titulo').textContent = e.titulo;
-    if (e.texto) document.getElementById('ev-texto').textContent = e.texto;
+    // textos de la barra de correo (sirven en los dos modos)
+    poner('fut-titulo', e.futuras_titulo);
+    poner('fut-nota', e.futuras_nota);
+    poner('fut-cta', e.futuras_cta);
+    poner('fut-gracias', e.futuras_gracias);
+
+    if (!e.fecha) {                       // sin show anunciado
+      poner('ev-titulo', e.sin_fecha_titulo);
+      return;
+    }
+
+    document.body.classList.remove('sin-fecha');
+    document.querySelector('.kicker').textContent = 'Pre-registro';
+    document.getElementById('ev-titulo').textContent = e.titulo || 'Próximo concierto';
+    poner('ev-texto', e.texto);
     if (e.cta) document.querySelector('#form-tokin button').textContent = e.cta;
-    var det = [e.fecha, e.lugar].filter(Boolean).join('  ·  ');
-    document.getElementById('ev-detalle').textContent = det;
-    if (e.extra) {                        // nota suelta (ej. el cumple)
+    document.getElementById('ev-detalle').textContent = [e.fecha, e.lugar].filter(Boolean).join('  ·  ');
+    if (e.extra) {                        // nota suelta
       var ex = document.getElementById('ev-extra');
       ex.textContent = e.extra;
       ex.hidden = false;
     }
     if (e.cartel) {                       // cartel del show, si hay
-      var c = document.getElementById('ev-cartel');
-      c.src = e.cartel;
-      c.hidden = false;
+      var cartel = document.getElementById('ev-cartel');
+      cartel.src = e.cartel;
+      cartel.hidden = false;
     }
-    if (e.titulo) document.title = 'SAUDAJI — ' + e.titulo;
+    document.title = 'SAUDAJI — ' + (e.titulo || 'Concierto');
     if (e.registro_cerrado) {             // registro cerrado: quita el form, deja el aviso
-      if (e.mensaje_cerrado) document.getElementById('ev-cerrado').textContent = e.mensaje_cerrado;
+      poner('ev-cerrado', e.mensaje_cerrado);
       document.body.classList.add('registro-cerrado');
       document.querySelector('.kicker').textContent = 'Registro cerrado';
-      if (e.futuras_titulo) document.getElementById('fut-titulo').textContent = e.futuras_titulo;
-      if (e.futuras_nota) document.getElementById('fut-nota').textContent = e.futuras_nota;
-      if (e.futuras_cta) document.getElementById('fut-cta').textContent = e.futuras_cta;
-      if (e.futuras_gracias) document.getElementById('fut-gracias').textContent = e.futuras_gracias;
     }
   }).catch(function () {}).then(function () {
     document.body.classList.remove('cargando');
