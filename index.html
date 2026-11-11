@@ -265,6 +265,9 @@
     border-color: rgba(255, 255, 255, 0.6);
   }
   html.cam-activa .boton:hover { background: #fff; color: #111; }
+  /* avisos del formulario: tonos claros, para que se lean sobre el video */
+  html.cam-activa .fc-estado.ok { color: #b9e4c9; }
+  html.cam-activa .fc-estado.error { color: #ffb3b3; }
   html.cam-activa .campo input,
   html.cam-activa .fc-campo input,
   html.cam-activa .fc-campo select { background: rgba(0, 0, 0, 0.35); color: #fff; }
@@ -464,7 +467,7 @@
     aspect-ratio: 1; border: 1px solid var(--linea); background: none; cursor: pointer; padding: 0;
     min-width: 0;
   }
-  .bt-celda:nth-of-type(4n+1) { border-color: rgba(255,255,255,0.35); }
+  .bt-celda:nth-of-type(4n+1) { border-color: var(--tinta-suave); }  /* marca cada tiempo */
   .bt-celda.on { background: var(--tinta); }
   .bt-celda.ahora { outline: 2px solid #ffd76a; z-index: 1; }
 
@@ -612,8 +615,9 @@
   .fc-album input { accent-color: var(--tinta); width: 16px; height: 16px; }
   .fc-trampa { position: absolute; left: -9999px; opacity: 0; pointer-events: none; }
   .fc-estado { min-height: 1.4em; font-size: 13px; text-align: center; }
-  .fc-estado.ok { color: #b9e4c9; }
-  .fc-estado.error { color: #ffb3b3; }
+  .fc-estado.ok { color: var(--verde); font-weight: 600; }
+  .fc-estado.error { color: #c0392b; }
+  .fc-estado a { border-bottom: 1px solid currentColor; }
   #form-contacto .boton { display: block; margin: 0.5rem auto 0; background: none; color: var(--tinta); cursor: pointer; font-family: inherit; }
   #form-contacto .boton:hover { background: var(--tinta); color: #fff; }
 
