@@ -48,7 +48,17 @@
     padding: 2rem;
   }
 
-  h1 { margin: 0 0 2.6rem; }
+  h1 { margin: 0 0 1.5rem; }
+
+  /* quién es, en una línea, y el botón para escuchar */
+  .lema {
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.6;
+    max-width: 310px;
+    margin: 0 auto 1.7rem;
+  }
+  header .boton { margin-bottom: 2.4rem; }
 
   h1 .logo {
     width: min(460px, 80vw);
@@ -222,6 +232,10 @@
 
   .boton:hover { background: var(--tinta); color: #fff; }
 
+  /* botón principal: relleno */
+  .boton.lleno { background: var(--tinta); color: #fff; }
+  .boton.lleno:hover { background: #fff; color: var(--tinta); }
+
   /* ---------- capa de fondo aislada (color dinámico + cámara) ----------
      isolation: isolate crea un stacking context propio: el mix-blend-mode del
      video se mezcla SOLO contra el color de esta capa, nunca contra el contenido. */
@@ -267,6 +281,7 @@
     border-color: rgba(255, 255, 255, 0.6);
   }
   html.cam-activa .boton, html.cam-activa #form-contacto .boton { background: rgba(0, 0, 0, 0.35); }
+  html.cam-activa .boton.lleno { background: #fff; color: #111; text-shadow: none; }
   html.cam-activa .boton:hover, html.cam-activa #form-contacto .boton:hover { background: #fff; color: #111; text-shadow: none; }
   /* avisos del formulario: tonos claros, para que se lean sobre el video */
   html.cam-activa .fc-estado.ok { color: #b9e4c9; }
@@ -302,7 +317,7 @@
      tienen fondo propio. */
   section, header, footer {
     background: transparent;
-    text-shadow: 0 0 4px #fff, 0 0 8px #fff, 0 0 14px #fff;
+    text-shadow: 0 0 3px #fff, 0 0 5px #fff, 0 0 5px #fff, 0 0 9px #fff, 0 0 9px #fff, 0 0 16px #fff;
   }
   html.cam-activa section, html.cam-activa header, html.cam-activa footer { text-shadow: 0 1px 7px rgba(0, 0, 0, 0.75); }
 
@@ -655,6 +670,8 @@
   <h1>
     <img class="logo" src="assets/logo.svg" alt="Saudaji">
   </h1>
+  <p class="lema">Proyecto solista de Santiago Tejeda. Neofolk y pop alternativo desde Ciudad de México.</p>
+  <a class="boton lleno" href="escucha.html">Escuchar</a>
   <nav>
     <a href="#bio">Bio</a>
     <a href="#musica">Música</a>
