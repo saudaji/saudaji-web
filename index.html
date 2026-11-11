@@ -175,6 +175,7 @@
     transition: color 0.3s, border-color 0.3s;
   }
   .plataformas a:hover { color: var(--tinta); border-color: var(--tinta); }
+  .plataformas.redes { margin-top: 1.6rem; }
 
   /* ---------- presskit ---------- */
   .pk-sub {
@@ -704,6 +705,29 @@
   <div class="discos">
     <!-- del más nuevo al más viejo -->
     <div class="disco">
+      <a href="https://open.spotify.com/track/0Ie6N45MynD1bqge5C9tt6" target="_blank" rel="noopener">
+        <img src="assets/covers/no-me-quiero-ir.jpg" alt="(no) me quiero ir — Saudaji" loading="lazy">
+      </a>
+      <span class="titulo">(no) me quiero ir</span>
+      <span class="detalle">Sencillo · 2026</span>
+      <div class="links">
+        <a href="https://open.spotify.com/track/0Ie6N45MynD1bqge5C9tt6" target="_blank" rel="noopener">Spotify</a>
+        <a href="https://music.apple.com/mx/album/no-me-quiero-ir-single/6814931922" target="_blank" rel="noopener">Apple</a>
+        <a href="https://music.youtube.com/playlist?list=OLAK5uy_lyE1l6if4-7RD_e9rDXpFCLaaEtqX61So" target="_blank" rel="noopener">YouTube</a>
+      </div>
+    </div>
+    <div class="disco">
+      <a href="https://open.spotify.com/track/1QowIWD9UsgEoXF8FMUg1Y" target="_blank" rel="noopener">
+        <img src="assets/covers/mucho-mas.jpg" alt="mucho + — Saudaji" loading="lazy">
+      </a>
+      <span class="titulo">mucho +</span>
+      <span class="detalle">Sencillo · 2026</span>
+      <div class="links">
+        <a href="https://open.spotify.com/track/1QowIWD9UsgEoXF8FMUg1Y" target="_blank" rel="noopener">Spotify</a>
+        <a href="https://music.apple.com/mx/album/mucho-single/6803281026" target="_blank" rel="noopener">Apple</a>
+      </div>
+    </div>
+    <div class="disco">
       <a href="https://distrokid.com/hyperfollow/saudaji1/--?ref=release" target="_blank" rel="noopener">
         <img src="assets/covers/sol-mano-sonrisa.jpg" alt="☼︎ ☞︎ ☺︎ — Saudaji" loading="lazy">
       </a>
@@ -739,9 +763,12 @@
       </div>
     </div>
   </div>
+  <!-- los data-link toman su URL de "links" en content.json (si existe ahí) -->
   <div class="plataformas">
-    <a href="https://saudaji.bandcamp.com/album/-" target="_blank" rel="noopener">Bandcamp</a>
-    <a href="https://soundcloud.com/santiiiiiiiii" target="_blank" rel="noopener">SoundCloud</a>
+    <a data-link="spotify" href="https://open.spotify.com/artist/1Y9oaq7o6sWlP4YKM9ohu9" target="_blank" rel="noopener">Spotify</a>
+    <a data-link="bandcamp" href="https://saudaji.bandcamp.com/album/-" target="_blank" rel="noopener">Bandcamp</a>
+    <a data-link="soundcloud" href="https://soundcloud.com/santiiiiiiiii" target="_blank" rel="noopener">SoundCloud</a>
+    <a href="escucha.html">Más plataformas →</a>
   </div>
 </section>
 
@@ -832,6 +859,11 @@
     <button class="boton" type="submit">Enviar</button>
   </form>
   <p style="margin-top: 2rem;"><a class="mail" href="mailto:saudaji@saudaji.com">saudaji@saudaji.com</a></p>
+  <div class="plataformas redes">
+    <a data-link="instagram" href="https://www.instagram.com/_saudaji" target="_blank" rel="noopener">Instagram</a>
+    <a data-link="tiktok" href="https://www.tiktok.com/@saudaji_" target="_blank" rel="noopener">TikTok</a>
+    <a data-link="x" href="https://x.com/saudaji_" target="_blank" rel="noopener">X</a>
+  </div>
 </section>
 
 <footer>© 2026 Saudaji</footer>
@@ -1107,6 +1139,13 @@
         det.append(document.createTextNode(pr.rol + (pr.año ? ' · ' + pr.año : '')));
         d.append(t, det);
         grid.append(d);
+      });
+    }
+    // links de plataformas y redes: cada <a data-link="x"> toma links.x
+    if (c.links) {
+      document.querySelectorAll('a[data-link]').forEach(function (a) {
+        var u = c.links[a.dataset.link];
+        if (u) a.href = u;
       });
     }
     // email de contacto
