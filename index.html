@@ -215,6 +215,8 @@
     text-transform: uppercase;
     border: 1px solid var(--tinta);
     padding: 1rem 2.5rem;
+    background: rgba(255, 255, 255, 0.88);
+    text-shadow: none;
     transition: background 0.3s, color 0.3s;
   }
 
@@ -264,7 +266,8 @@
     color: #fff;
     border-color: rgba(255, 255, 255, 0.6);
   }
-  html.cam-activa .boton:hover { background: #fff; color: #111; }
+  html.cam-activa .boton, html.cam-activa #form-contacto .boton { background: rgba(0, 0, 0, 0.35); }
+  html.cam-activa .boton:hover, html.cam-activa #form-contacto .boton:hover { background: #fff; color: #111; text-shadow: none; }
   /* avisos del formulario: tonos claros, para que se lean sobre el video */
   html.cam-activa .fc-estado.ok { color: #b9e4c9; }
   html.cam-activa .fc-estado.error { color: #ffb3b3; }
@@ -294,8 +297,14 @@
   #fondo-capa.cam-on #collage { opacity: 0; }
 
   /* sin velo: las secciones son transparentes, el texto va directo sobre el blanco;
-     las fotos chicas parpadean detrás sin estorbar la lectura */
-  section, header, footer { background: transparent; }
+     las fotos chicas parpadean detrás. Para que no estorben la lectura, el texto
+     lleva un halo blanco (igual que en concierto.html) y los campos y botones
+     tienen fondo propio. */
+  section, header, footer {
+    background: transparent;
+    text-shadow: 0 0 4px #fff, 0 0 8px #fff, 0 0 14px #fff;
+  }
+  html.cam-activa section, html.cam-activa header, html.cam-activa footer { text-shadow: 0 1px 7px rgba(0, 0, 0, 0.75); }
 
   #cam-toggle {
     position: fixed;
@@ -599,7 +608,7 @@
   .fc-campo input[type=text], .fc-campo input[type=tel], .fc-campo input[type=email],
   .fc-campo input[type=number], .fc-campo select {
     width: 100%;
-    background: none;
+    background: #fff;
     border: 1px solid var(--linea);
     color: var(--tinta);
     font: inherit;
@@ -618,7 +627,7 @@
   .fc-estado.ok { color: var(--verde); font-weight: 600; }
   .fc-estado.error { color: #c0392b; }
   .fc-estado a { border-bottom: 1px solid currentColor; }
-  #form-contacto .boton { display: block; margin: 0.5rem auto 0; background: none; color: var(--tinta); cursor: pointer; font-family: inherit; }
+  #form-contacto .boton { display: block; margin: 0.5rem auto 0; background: rgba(255, 255, 255, 0.88); color: var(--tinta); cursor: pointer; font-family: inherit; }
   #form-contacto .boton:hover { background: var(--tinta); color: #fff; }
 
   footer {
@@ -639,8 +648,8 @@
 </head>
 <body>
 
-<!-- capa de fondo: blanco siempre + video de cámara en modo espejo -->
-<div id="fondo-capa" aria-hidden="true"></div>
+<!-- capa de fondo: blanco siempre + canvas de fotos + video de cámara en modo espejo -->
+<div id="fondo-capa" aria-hidden="true"><div id="collage"></div></div>
 
 <header>
   <h1>
@@ -925,19 +934,24 @@
    Nunca es un collage fijo: es un canvas vivo que se recompone solo. */
 (function () {
   /* ===== valores ajustables ===== */
-  var VISIBLES = window.innerWidth < 700 ? 9 : 16; // cuántas fotos a la vez (pocas = mucho blanco)
+  var VISIBLES = window.innerWidth < 700 ? 6 : 16; // cuántas fotos a la vez (pocas = mucho blanco)
   var VIDA_MIN = 2600, VIDA_MAX = 6500;            // ms que dura visible cada foto
   var FADE = 3000;                                 // ms del fade-out (coincide con el CSS)
   var TAM_MIN = 42, TAM_MAX = 104;                 // px de ancho (fotos chicas)
+  var RESERVA = window.innerWidth < 700 ? 24 : 48; // fotos distintas por visita: tope de datos (~14 KB c/u)
   /* ============================== */
 
   var cont = document.getElementById('collage');
   if (!cont) return;
+  // sin fotos si la persona pidió menos movimiento o ahorro de datos
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (navigator.connection && navigator.connection.saveData) return;
   var rnd = function (a, b) { return a + Math.random() * (b - a); };
   var fotos = [];
 
   function spawn() {
     if (!fotos.length) return;
+    if (document.hidden) { setTimeout(spawn, 2000); return; }   // pestaña en segundo plano: espera
     var nombre = fotos[Math.floor(Math.random() * fotos.length)];
     var img = document.createElement('img');
     img.className = 'foto';
@@ -963,7 +977,9 @@
     if (!r.ok) throw 0;
     return r.json();
   }).then(function (list) {
-    fotos = list;
+    // cada visita usa RESERVA fotos al azar de todas las que hay: se ven distintas
+    // cada vez, pero una visita larga no se acaba los datos del celular
+    fotos = list.slice().sort(function () { return Math.random() - 0.5; }).slice(0, RESERVA);
     for (var i = 0; i < VISIBLES; i++) setTimeout(spawn, rnd(0, 2600)); // arranque escalonado
   }).catch(function () {
     console.info('[collage] no se cargó assets/fuji/manifest.json — fondo blanco');
