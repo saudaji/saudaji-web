@@ -126,7 +126,7 @@
     border: 1px solid var(--linea);
     color: var(--tinta);
     font: inherit;
-    font-size: 15px;
+    font-size: 16px;   /* 16px mínimo: con menos, Safari en iPhone hace zoom al tocar el campo */
     padding: 0.75rem 0.85rem;
   }
   .campo input:focus { outline: none; border-color: var(--tinta); }
@@ -190,7 +190,7 @@
   .futuras .nota-futuras:empty { display: none; }
   .futuras .nota-futuras:empty + form { margin-top: 0.9rem; }
   .futuras .barra { display: flex; border: 1px solid var(--tinta); background: #fff; }
-  .futuras .barra input { flex: 1; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 15px; padding: 0.8rem 0.85rem; color: var(--tinta); }
+  .futuras .barra input { flex: 1; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 16px; padding: 0.8rem 0.85rem; color: var(--tinta); }
   .futuras .barra input:focus { outline: none; }
   .futuras .barra.error { border-color: #d92b2b; }
   .futuras .barra button { width: auto; margin: 0; flex: none; padding: 0 1.2rem; }
