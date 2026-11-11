@@ -28,7 +28,7 @@
   :root {
     --verde: #3c795c;
     --tinta: #1a1a1a;
-    --tinta-suave: rgba(26, 26, 26, 0.55);
+    --tinta-suave: rgba(26, 26, 26, 0.62);  /* 0.62 = contraste 4.9:1 sobre blanco */
     --linea: rgba(26, 26, 26, 0.18);
     --bg: #ffffff;
   }
@@ -211,8 +211,13 @@
   .futuras.listo .ok-futuras { display: block; }
   body.enviado .gracias { display: block; font-size: 17px; font-weight: 300; margin: 1rem auto 0; max-width: 360px; text-shadow: 0 0 8px #fff, 0 0 8px #fff; }
 
+  /* área táctil cómoda (~44px) sin mover nada: una zona invisible alrededor del link */
+  .volver { position: relative; }
+  .volver::after { content: ""; position: absolute; inset: -0.75rem -0.6rem; }
+
   @media (max-width: 600px) {
-    .home { left: 1.2rem; top: 1.2rem; }
+    /* en celular el logo se queda arriba, no flota encima del contenido al bajar */
+    .home { position: absolute; left: 1.2rem; top: 1.2rem; }
     .home img { width: 120px; }
     main { padding: 6.5rem 1.4rem 3rem; }
   }

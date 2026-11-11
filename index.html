@@ -25,7 +25,7 @@
   :root {
     --verde: #3c795c;        /* acento de marca */
     --tinta: #1a1a1a;        /* texto principal (oscuro sobre blanco) */
-    --tinta-suave: rgba(26, 26, 26, 0.55);
+    --tinta-suave: rgba(26, 26, 26, 0.62);  /* 0.62 = contraste 4.9:1 sobre blanco */
     --linea: rgba(26, 26, 26, 0.18);
     --bg: #ffffff;
   }
@@ -53,6 +53,7 @@
   /* ---------- header: logo grande centrado + nav debajo ---------- */
   header {
     min-height: 100vh;
+    min-height: 100svh;   /* en celular: alto real, sin contar la barra del navegador */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -82,10 +83,12 @@
   nav {
     display: flex;
     flex-wrap: wrap;
-    gap: 1.1rem 2.2rem;
+    gap: 0 1.2rem;
     justify-content: center;
+    margin: 0 -0.5rem;   /* compensa el padding de los links de las orillas */
   }
   nav a {
+    padding: 0.75rem 0.5rem;   /* área táctil de ~44px; el aire entre links es el mismo */
     font-size: 12px;
     letter-spacing: 0.28em;
     text-transform: uppercase;
@@ -161,7 +164,6 @@
   }
 
   .disco .links {
-    margin-top: 0.5rem;
     font-size: 10px;
     letter-spacing: 0.15em;
     text-transform: uppercase;
@@ -170,8 +172,12 @@
   .disco .links a {
     color: var(--tinta-suave);
     transition: color 0.3s;
-    margin: 0 0.35rem;
+    display: inline-block;
+    position: relative;
+    padding: 0.45rem 0.35rem;
   }
+  /* área táctil de ~40px: zona invisible que sobresale un poco arriba y abajo */
+  .disco .links a::after { content: ""; position: absolute; inset: -0.3rem 0; }
 
   .disco .links a:hover { color: var(--tinta); }
 
@@ -187,6 +193,9 @@
     padding-bottom: 2px;
     transition: color 0.3s, border-color 0.3s;
   }
+  /* área táctil cómoda (~44px) sin mover nada: una zona invisible alrededor del link */
+  .plataformas a, .contacto a.mail { position: relative; }
+  .plataformas a::after, .contacto a.mail::after { content: ""; position: absolute; inset: -0.7rem -0.5rem; }
   .plataformas a:hover { color: var(--tinta); border-color: var(--tinta); }
   .plataformas.redes { margin-top: 1.6rem; }
 
@@ -668,8 +677,14 @@
     color: var(--tinta-suave);
   }
 
+  /* en celular el botón de modo espejo se queda arriba (no persigue al texto);
+     solo se fija a la pantalla mientras la cámara está prendida, para poder apagarla */
+  @media (max-width: 600px) {
+    #cam-toggle:not(.on) { position: absolute; }
+  }
+
   @media (max-width: 480px) {
-    nav { gap: 1.5rem; }
+    nav { gap: 0 0.5rem; }
     section { padding: 4rem 1.5rem; }
     .discos { grid-template-columns: repeat(2, 1fr); }
   }

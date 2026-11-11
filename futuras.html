@@ -23,7 +23,7 @@
      Al enviar, se cambia el cuestionario por la foto del caballo (assets/caballo.jpg). */
   :root {
     --tinta: #1a1a1a;
-    --tinta-suave: rgba(26, 26, 26, 0.55);
+    --tinta-suave: rgba(26, 26, 26, 0.62);  /* 0.62 = contraste 4.9:1 sobre blanco */
     --linea: rgba(26, 26, 26, 0.18);
     --bg: #ffffff;
   }
@@ -87,8 +87,13 @@
     border-bottom: 1px solid var(--linea);
   }
 
+  /* área táctil cómoda (~44px) sin mover nada: una zona invisible alrededor del link */
+  .volver { position: relative; }
+  .volver::after { content: ""; position: absolute; inset: -0.75rem -0.6rem; }
+
   @media (max-width: 600px) {
-    .home { left: 1.2rem; top: 1.2rem; }
+    /* en celular el logo se queda arriba, no flota encima del contenido al bajar */
+    .home { position: absolute; left: 1.2rem; top: 1.2rem; }
     .home img { width: 120px; }
     main { padding: 7rem 1.4rem 3rem; }
   }

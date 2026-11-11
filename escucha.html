@@ -26,7 +26,7 @@
      a Spotify y avisa que todavía no está ahí. */
   :root {
     --tinta: #1a1a1a;
-    --tinta-suave: rgba(26, 26, 26, 0.55);
+    --tinta-suave: rgba(26, 26, 26, 0.62);  /* 0.62 = contraste 4.9:1 sobre blanco */
     --linea: rgba(26, 26, 26, 0.18);
     --bg: #ffffff;
   }
@@ -74,7 +74,7 @@
     font-size: 11px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    padding: 0.45rem 0.9rem;
+    padding: 0.6rem 0.9rem;
     cursor: pointer;
     transition: border-color 0.2s, background 0.2s, color 0.2s;
   }
@@ -152,8 +152,14 @@
     border-bottom: 1px solid var(--linea);
   }
 
+  /* área táctil cómoda (~44px) sin mover nada: una zona invisible alrededor del link */
+  .volver, .video, .tambien a { position: relative; }
+  .volver::after, .video::after { content: ""; position: absolute; inset: -0.75rem -0.6rem; }
+  .tambien a::after { content: ""; position: absolute; inset: -0.9rem -0.25rem; }
+
   @media (max-width: 600px) {
-    .home { left: 1.2rem; top: 1.2rem; }
+    /* en celular el logo se queda arriba, no flota encima de las portadas al bajar */
+    .home { position: absolute; left: 1.2rem; top: 1.2rem; }
     .home img { width: 120px; }
     main { padding: 7rem 1.4rem 3rem; }
   }
