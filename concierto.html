@@ -283,12 +283,17 @@
 (function () {
   var VISIBLES = window.innerWidth < 700 ? 5 : 10;
   var VIDA_MIN = 2800, VIDA_MAX = 6500, FADE = 3000, TAM_MIN = 42, TAM_MAX = 100;
+  var RESERVA = window.innerWidth < 700 ? 20 : 40;   // fotos distintas por visita: tope de datos (~14 KB c/u)
   var cont = document.getElementById('collage');
   if (!cont) return;
+  // sin fotos si la persona pidió menos movimiento o ahorro de datos
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (navigator.connection && navigator.connection.saveData) return;
   var rnd = function (a, b) { return a + Math.random() * (b - a); };
   var fotos = [];
   function spawn() {
     if (!fotos.length) return;
+    if (document.hidden) { setTimeout(spawn, 2000); return; }   // pestaña en segundo plano: espera
     var img = document.createElement('img');
     img.className = 'foto';
     img.src = 'assets/fuji/' + fotos[Math.floor(Math.random() * fotos.length)];
@@ -305,7 +310,10 @@
     }, rnd(VIDA_MIN, VIDA_MAX));
   }
   fetch('assets/fuji/manifest.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); })
-    .then(function (l) { fotos = l; for (var i = 0; i < VISIBLES; i++) setTimeout(spawn, rnd(0, 2600)); })
+    .then(function (l) {
+      fotos = l.slice().sort(function () { return Math.random() - 0.5; }).slice(0, RESERVA);
+      for (var i = 0; i < VISIBLES; i++) setTimeout(spawn, rnd(0, 2600));
+    })
     .catch(function () {});
 })();
 

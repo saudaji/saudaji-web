@@ -20,7 +20,7 @@
 <style>
   /* Página suelta con solo el cuestionario de TRABAJO (link directo para compartir).
      Mismo formulario y mismo Google Form que la sección Contacto de index.html.
-     Al enviar, se cambia el cuestionario por la foto del caballo (assets/caballo.jpg). */
+     Al enviar, se cambia el cuestionario por la foto del caballo (assets/caballo.webp). */
   :root {
     --tinta: #1a1a1a;
     --tinta-suave: rgba(26, 26, 26, 0.62);  /* 0.62 = contraste 4.9:1 sobre blanco */
@@ -171,7 +171,7 @@
   </div>
 
   <div class="listo">
-    <img src="assets/caballo.jpg" alt="Un caballo con lentes frente a una laptop">
+    <img src="assets/caballo.webp" alt="Un caballo con lentes frente a una laptop" loading="lazy" width="1024" height="1536">
   </div>
 
   <a class="volver" href="index.html">← saudaji.com</a>
@@ -189,9 +189,11 @@
   var C_TEL = 'entry.401038771';
   var C_CORREO = 'entry.176961981';
 
-  new Image().src = 'assets/caballo.jpg';   // precarga, para que salga al instante
 
   var form = document.getElementById('form-trabajo');
+  // la foto del final se precarga cuando alguien toca el formulario: sale al instante
+  // al enviar, y quien solo mira la página no la descarga
+  form.addEventListener('focusin', function () { new Image().src = 'assets/caballo.webp'; }, { once: true });
   var estado = form.querySelector('.fc-estado');
 
   function validar() {
