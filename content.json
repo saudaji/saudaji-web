@@ -128,6 +128,15 @@
       "cover": "assets/covers/persona.jpg",
       "link": "",
       "descripcion": ""
+    },
+    {
+      "titulo": "La flor",
+      "artista": "Tuzeint",
+      "rol": "Producción · Composición",
+      "año": "2026",
+      "cover": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/71/1a/bb/711abb51-67f7-746f-8688-d4f3e4ec2fb8/823375545217_Cover.jpg/600x600bb.jpg",
+      "link": "https://music.apple.com/mx/album/la-flor/6824664212?i=6824664429",
+      "descripcion": ""
     }
   ]
 }
