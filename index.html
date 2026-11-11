@@ -656,12 +656,12 @@
 <section id="bio">
   <h2>Bio</h2>
   <div id="bio-texto">
-  <p>Saudaji es el proyecto musical de Santiago Tejeda — productor, compositor y diseñador desde Ciudad de México.</p>
-  <p>Haciendo música desde los 18, mezcla neofolk, alternativo, pop y texturas orgánicas buscando otras formas de producir y componer: canciones que suenan a cuarto, a campo y a máquina al mismo tiempo.</p>
-  <p>Fuera de su proyecto es productor e ingeniero de audio en Sagredo Estudio, su propio estudio, donde ha trabajado con artistas clave de la escena alternativa como Wet Baes, ALONG y Los Milagro. Ha tocado en más de la mitad del país y en Los Ángeles, como parte de la nueva ola del pop independiente mexicano.</p>
+  <p>Saudaji es el proyecto solista de Santiago Tejeda — productor, compositor, ingeniero de audio y diseñador con base en Ciudad de México. Hace música desde los 18 años y se mueve entre el neofolk, el pop alternativo y las texturas orgánicas, buscando siempre otras formas de producir y componer: canciones que suenan a cuarto, a campo y a máquina al mismo tiempo.</p>
+  <p>Como solista ha publicado los EPs «tormenta, Callada» (2024) y «☼ ☞ ☺» (2025), además del sencillo «RUIDO» (2025), todos producidos, grabados y mezclados por él mismo bajo una ética DIY. Su música retrata la ansiedad y la belleza de lo cotidiano con un enfoque honesto y artesanal.</p>
+  <p>Fuera de su proyecto es productor e ingeniero de audio, y socio y dueño de Sagredo Estudio, donde ha colaborado con artistas clave de la escena alternativa mexicana como Wet Baes, ALONG y Los Milagro. Ha tocado en más de la mitad del país y en Los Ángeles, consolidándose como parte de la nueva ola del pop independiente mexicano.</p>
   </div>
-  <ul class="highlights">
-    <li>Productor, compositor e ingeniero de audio. Fundador de Sagredo Estudio, su propio estudio en CDMX.</li>
+  <ul class="highlights" id="highlights">
+    <li>Productor, compositor e ingeniero de audio. Socio y dueño de Sagredo Estudio en CDMX.</li>
     <li>Shows y colaboraciones con Los Milagro, ALONG, Wet Baes, Daniel Quién y BAM BAM ATOM., entre otros.</li>
     <li>Grabaciones con ALONG, Ivana, Doris Anahí, Rafa Arreguín, Fer Altuzar, Ahora Juntos, Disco Bahía y Enzo Marcelo, entre otros.</li>
     <li>Producciones para ALONG, Fer Altuzar, BAM BAM ATOM., Doris Anahí y Ramona Vee, entre otros.</li>
@@ -1005,7 +1005,7 @@
 })();
 
 /* ---------- contenido editable (content.json) ----------
-   El texto de bio y el grid de trabajo se leen de content.json (edítalo con
+   El texto de bio, los highlights y el grid de trabajo se leen de content.json (edítalo con
    admin.html — ver GUIA.md). Si el fetch falla (p. ej. abriendo index.html
    directo por file://, donde el navegador bloquea fetch local), el HTML de
    respaldo que ya está en la página se queda tal cual: el sitio nunca queda vacío. */
@@ -1030,6 +1030,16 @@
         img.style.cssText = 'max-width:240px;width:100%;margin:0 auto 2rem;display:block';
         cont.prepend(img);
       }
+    }
+    // highlights: una línea por elemento
+    if (Array.isArray(c.highlights) && c.highlights.length) {
+      var hl = document.getElementById('highlights');
+      hl.innerHTML = '';
+      c.highlights.forEach(function (h) {
+        var li = document.createElement('li');
+        li.textContent = h;
+        hl.append(li);
+      });
     }
     // portafolio → grid de trabajo
     if (Array.isArray(c.portafolio) && c.portafolio.length) {
