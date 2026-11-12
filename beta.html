@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SAUDAJI — beta</title>
+<meta name="description" content="SAUDAJI — proyecto solista de Santiago Tejeda. Neofolk y pop alternativo desde Ciudad de México.">
+<!-- página de prueba: no se enlaza desde la home ni se indexa -->
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#01070a">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<style>
+  /* BETA — "el fondo": la página es una bajada al mar de noche. Arriba, la superficie;
+     abajo, a 2000 m, un desierto hundido. Cada sección vive a una profundidad y tiene
+     una reliquia en 3D (js/abismo.js la dibuja encima de su <div class="reliquia">).
+     El contenido sale de content.json, igual que en la home. Sin librerías. */
+  :root {
+    --abismo: #01070a;
+    --hueso: #f4efe6;                          /* texto */
+    --hueso-suave: rgba(244, 239, 230, 0.68);
+    --cian: #7ff3e6;                           /* luz propia del agua */
+    --naranja: #ff6700;                        /* la brasa: el color de la marca */
+    --filo: rgba(160, 225, 230, 0.18);         /* bordes de vidrio */
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    /* los juegos (js/*.js) leen estas tres */
+    --tinta: #f4efe6;
+    --tinta-suave: rgba(244, 239, 230, 0.68);
+    --linea: rgba(244, 239, 230, 0.22);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; background: var(--abismo); }
+  body {
+    color: var(--hueso);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    /* sin 3D se queda este degradado: la página funciona igual */
+    background: linear-gradient(#0a3a44 0, #03161c 70vh, #01070a 160vh) var(--abismo);
+  }
+  a { color: inherit; text-decoration: none; }
+  :focus-visible { outline: 2px solid var(--cian); outline-offset: 3px; }
+  ::selection { background: var(--naranja); color: #fff; }
+  .solo-lector { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* ---------- el agua (canvas WebGL) y el modo espejo (video) ---------- */
+  #agua, #espejo-video {
+    position: fixed; left: 0; top: 0; width: 100%;
+    height: 100vh; height: 100lvh;             /* alto máximo: no brinca cuando el celular esconde su barra */
+    pointer-events: none;
+  }
+  #agua { z-index: 0; opacity: 0; transition: opacity 1.4s ease; }
+  #agua.lista { opacity: 1; }
+  #espejo-video { z-index: 0; object-fit: cover; filter: saturate(0.5) brightness(0.6) contrast(1.15); }
+  header, main, footer { position: relative; z-index: 1; }
+
+  /* ---------- velos: el contenido se desvanece bajo los instrumentos y la consola ---------- */
+  .velo { position: fixed; left: 0; right: 0; z-index: 4; pointer-events: none; }
+  .velo.arriba { top: 0; height: 96px; background: linear-gradient(rgba(1, 7, 10, 0.92) 30%, rgba(1, 7, 10, 0)); opacity: 0; transition: opacity 0.6s; }
+  .bajo .velo.arriba { opacity: 1; }
+  .velo.abajo { bottom: 0; height: 110px; background: linear-gradient(rgba(1, 7, 10, 0), rgba(1, 7, 10, 0.88) 75%); }
+
+  /* ---------- instrumentos fijos (HUD) ---------- */
+  .hud { position: fixed; z-index: 5; font-family: var(--mono); font-size: 10px; line-height: 1.5; letter-spacing: 0.14em; text-transform: uppercase; color: var(--hueso-suave); pointer-events: none; }
+  .hud b { font-weight: 400; color: var(--hueso); }
+  .hud-izq { top: calc(0.9rem + env(safe-area-inset-top)); left: 1rem; pointer-events: auto; }
+  .hud-izq a { display: block; position: relative; color: var(--naranja); letter-spacing: 0.3em; opacity: 0; transition: opacity 0.6s; }
+  .hud-izq a::after { content: ""; position: absolute; inset: -0.85rem -0.8rem -0.2rem; }      /* área táctil */
+  .bajo .hud-izq a { opacity: 1; }
+  .hud-izq span { display: block; }
+  /* interruptor de sonido */
+  #sonido { margin: 0.1rem 0 0 -0.7rem; padding: 0.8rem 0.7rem; background: none; border: 0; cursor: pointer; font: inherit; letter-spacing: inherit; text-transform: inherit; color: var(--hueso-suave); }
+  #sonido::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 0.6em; border-radius: 50%; border: 1px solid var(--hueso-suave); vertical-align: 1px; }
+  #sonido[aria-pressed="true"] { color: var(--hueso); }
+  #sonido[aria-pressed="true"]::before { background: var(--cian); border-color: var(--cian); box-shadow: 0 0 8px var(--cian); }
+  .hud-der { top: calc(0.9rem + env(safe-area-inset-top)); right: 1.6rem; text-align: right; }
+  .hud-der #hud-m { font-size: 15px; letter-spacing: 0.08em; }
+  /* sonda: la regla vertical que marca cuánto has bajado */
+  .sonda { top: 22%; bottom: 24%; right: 0.55rem; width: 9px; background: repeating-linear-gradient(180deg, var(--filo) 0 1px, transparent 1px 10%); border-right: 1px solid var(--filo); }
+  .sonda i { position: absolute; right: -1px; top: 0; width: 13px; height: 2px; background: var(--naranja); box-shadow: 0 0 10px var(--naranja); transform: translateY(-1px); }
+
+  /* ---------- consola: el menú, fijo abajo ---------- */
+  .consola {
+    position: fixed; z-index: 6; left: 50%; bottom: calc(0.7rem + env(safe-area-inset-bottom)); transform: translateX(-50%);
+    display: flex; max-width: calc(100vw - 1rem); overflow-x: auto; scrollbar-width: none;
+    padding: 0 0.5rem; border-radius: 999px;
+    background: linear-gradient(180deg, rgba(14, 48, 58, 0.72), rgba(3, 14, 18, 0.82));
+    border: 1px solid var(--filo);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 12px 40px rgba(0, 0, 0, 0.6);
+    -webkit-backdrop-filter: blur(14px) saturate(1.3); backdrop-filter: blur(14px) saturate(1.3);
+  }
+  .consola::-webkit-scrollbar { display: none; }
+  .consola a {
+    flex: none; padding: 0.95rem 0.36rem; font-size: 9px; letter-spacing: 0.13em; text-transform: uppercase;
+    color: var(--hueso-suave); transition: color 0.3s; position: relative;
+  }
+  .consola a:hover { color: var(--hueso); }
+  .consola a.aqui { color: var(--hueso); }
+  .consola a.aqui::after { content: ""; position: absolute; left: 50%; bottom: 0.45rem; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--naranja); box-shadow: 0 0 8px var(--naranja); }
+
+  @media (max-width: 370px) { .consola a { padding: 0.95rem 0.24rem; font-size: 8px; letter-spacing: 0.07em; } }
+
+  /* ---------- superficie (hero) ---------- */
+  .superficie {
+    min-height: 84vh; min-height: 84svh;       /* menos que la pantalla: el disco de abajo se asoma e invita a bajar */
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 4rem 1.5rem 7rem;
+  }
+  .superficie h1 { margin-bottom: 1.6rem; }
+  .logo {
+    display: block; width: min(470px, 82vw); height: auto;
+    filter: drop-shadow(0 0 18px rgba(255, 103, 0, 0.5)) drop-shadow(0 0 70px rgba(255, 103, 0, 0.28));
+    animation: brasa 7s ease-in-out infinite, flota 9s ease-in-out infinite;
+  }
+  /* el logo late como una brasa bajo el agua */
+  @keyframes brasa { 0%, 100% { opacity: 1; } 46% { opacity: 0.93; } 48% { opacity: 0.78; } 50% { opacity: 0.96; } 53% { opacity: 0.85; } 56% { opacity: 1; } }
+  @keyframes flota { 50% { transform: translateY(-9px) rotate(-0.6deg); } }
+  .lema { max-width: 320px; margin: 0 auto 2rem; font-size: 14px; color: var(--hueso-suave); }
+  .desciende { margin-top: 3.2rem; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--hueso-suave); display: flex; flex-direction: column; align-items: center; gap: 0.8rem; }
+  .desciende::after { content: ""; width: 1px; height: 46px; background: linear-gradient(var(--cian), transparent); animation: gotea 2.4s ease-in-out infinite; transform-origin: top; }
+  @keyframes gotea { 0% { transform: scaleY(0); opacity: 0; } 40% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(1) translateY(18px); opacity: 0; } }
+
+  /* ---------- botones de gel (Aqua, año 2000) ---------- */
+  .gel {
+    display: inline-block; position: relative; overflow: hidden; cursor: pointer;
+    padding: 1rem 2.7rem; border: 0; border-radius: 999px;
+    font: inherit; font-size: 11px; font-weight: 500; letter-spacing: 0.32em; text-transform: uppercase; color: #fff;
+    text-shadow: 0 1px 1px rgba(110, 35, 0, 0.7);
+    background: linear-gradient(180deg, #ffa25c 0%, #ff7a1a 46%, #f25f00 52%, #ff8125 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -7px 12px rgba(120, 30, 0, 0.35), 0 0 0 1px rgba(110, 35, 0, 0.6), 0 10px 30px rgba(255, 103, 0, 0.35), 0 0 70px rgba(255, 103, 0, 0.2);
+    transition: transform 0.25s, box-shadow 0.25s, filter 0.25s;
+  }
+  .gel::before { content: ""; position: absolute; left: 7%; right: 7%; top: 2px; height: 46%; border-radius: 999px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.06)); pointer-events: none; }
+  .gel:hover { transform: translateY(-2px); filter: brightness(1.08); }
+  .gel:active { transform: translateY(1px) scale(0.98); }
+  /* variante de vidrio, para lo secundario */
+  .gel.vidrio {
+    color: var(--hueso); text-shadow: none; font-weight: 400;
+    background: linear-gradient(180deg, rgba(127, 243, 230, 0.16), rgba(127, 243, 230, 0.04));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), inset 0 -6px 10px rgba(0, 0, 0, 0.25), 0 0 0 1px var(--filo), 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+  .gel.vidrio::before { background: linear-gradient(180deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0)); }
+  .gel.chico { padding: 0.75rem 1.4rem; font-size: 10px; letter-spacing: 0.22em; }
+  .botones { display: flex; flex-wrap: wrap; gap: 0.7rem; justify-content: center; margin-top: 1.6rem; }
+
+  /* ---------- zonas: reliquia + panel ---------- */
+  .zona { padding: 0 0.9rem; margin: 0 auto 16vh; max-width: 1120px; scroll-margin-top: 1rem; }
+  .reliquia {
+    height: min(44vh, 320px); width: 100%;
+    touch-action: pan-y;                       /* arrastrar de lado la gira; de arriba abajo, la página sigue bajando */
+    cursor: grab; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none;
+  }
+  .reliquia:active { cursor: grabbing; }
+  .reliquia { position: relative; }
+  .rotulo { position: absolute; left: 0; right: 0; bottom: 0.2rem; text-align: center; font-family: var(--mono); font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--hueso-suave); pointer-events: none; }
+  .rotulo b { font-weight: 400; color: var(--cian); }
+  .sin-3d .rotulo { display: none; }
+  .sin-3d .reliquia { height: 4vh; }
+  .panel {
+    position: relative; max-width: 580px; margin: 0 auto; padding: 2.3rem 1.3rem 2.1rem; text-align: center;
+    border-radius: 24px;
+    background: linear-gradient(180deg, rgba(9, 36, 44, 0.84), rgba(2, 12, 16, 0.90));
+    border: 1px solid var(--filo);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 30px 90px rgba(0, 0, 0, 0.6);
+  }
+  .panel::before { content: ""; position: absolute; left: 12%; right: 12%; top: -1px; height: 1px; background: linear-gradient(90deg, transparent, rgba(200, 255, 250, 0.7), transparent); }
+  /* los paneles emergen al llegar a ellos (solo con JS; sin JS se ven desde el principio) */
+  .js .panel { opacity: 0; transform: translateY(36px); transition: opacity 1s ease, transform 1.1s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .js .panel.visto { opacity: 1; transform: none; }
+  .cota { font-family: var(--mono); font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--naranja); margin-bottom: 0.7rem; }
+  /* títulos de cromo */
+  h2 {
+    font-size: clamp(25px, 7.4vw, 40px); font-weight: 300; letter-spacing: 0.24em; text-transform: uppercase; line-height: 1.2;
+    margin: 0 0 1.6rem; text-indent: 0.24em;   /* el sangrado compensa el espacio que sobra tras la última letra */
+    background: linear-gradient(180deg, #ffffff 0%, #c8f3f2 34%, #5b9aa1 50%, #eaffff 58%, #a3dadd 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 16px rgba(127, 243, 230, 0.28));
+  }
+  h3 { font-size: 10px; font-weight: 400; letter-spacing: 0.34em; text-transform: uppercase; color: var(--hueso-suave); margin: 2.2rem 0 1rem; }
+  .panel p { margin-bottom: 1.1rem; }
+  .nota { font-size: 12px; color: var(--hueso-suave); }
+  .enlace { color: var(--hueso-suave); border-bottom: 1px solid var(--filo); padding-bottom: 2px; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; transition: color 0.3s, border-color 0.3s; position: relative; }
+  .enlace::after { content: ""; position: absolute; inset: -0.8rem -0.4rem; }
+  .enlace:hover { color: var(--hueso); border-color: var(--hueso); }
+  .enlaces { display: flex; flex-wrap: wrap; gap: 1.1rem 1.6rem; justify-content: center; margin-top: 1.8rem; }
+
+  /* ---------- escuchar ---------- */
+  .reproductor { width: 100%; height: 152px; border: 0; border-radius: 14px; display: block; background: rgba(0, 0, 0, 0.35); }
+  .plataformas { display: flex; flex-wrap: wrap; gap: 0.55rem; justify-content: center; margin: 1rem 0 0; }
+  .pistas { list-style: none; margin-top: 1.6rem; text-align: left; border-top: 1px solid var(--filo); }
+  .pista {
+    display: flex; align-items: center; gap: 0.9rem; width: 100%; padding: 0.65rem 0.3rem; cursor: pointer;
+    background: none; border: 0; border-bottom: 1px solid var(--filo); color: inherit; font: inherit; text-align: left;
+    transition: background 0.25s;
+  }
+  .pista:hover { background: rgba(127, 243, 230, 0.05); }
+  .pista img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; flex: none; }
+  .pista .tit { display: block; font-size: 14.5px; font-weight: 400; line-height: 1.3; }
+  .pista .det { display: block; font-size: 10.5px; letter-spacing: 0.1em; color: var(--hueso-suave); text-transform: uppercase; }
+  .pista .luz { margin-left: auto; width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--filo); flex: none; transition: all 0.3s; }
+  .pista[aria-current="true"] .tit { color: #fff; }
+  .pista[aria-current="true"] .luz { background: var(--naranja); border-color: var(--naranja); box-shadow: 0 0 12px var(--naranja); }
+
+  /* ---------- bio ---------- */
+  #bio-texto { text-align: left; }
+  .highlights { list-style: none; text-align: left; font-size: 13px; color: var(--hueso-suave); }
+  .highlights li { padding: 0.6rem 0 0.6rem 1.1rem; border-top: 1px solid var(--filo); position: relative; }
+  .highlights li::before { content: ""; position: absolute; left: 0; top: 1.2rem; width: 4px; height: 4px; border-radius: 50%; background: var(--cian); box-shadow: 0 0 8px var(--cian); }
+
+  /* ---------- formularios ---------- */
+  .campo { margin-bottom: 1rem; text-align: left; }
+  .campo > label { display: block; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--hueso-suave); margin-bottom: 0.35rem; }
+  .campo input, .campo select, .barra input {
+    width: 100%; font: inherit; font-size: 16px;      /* 16px: con menos, Safari en iPhone hace zoom al tocar */
+    color: var(--hueso); background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--filo); border-radius: 12px; padding: 0.75rem 0.9rem;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4); transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .campo select option { color: #111; }
+  .campo input:focus, .campo select:focus, .barra input:focus { outline: none; border-color: var(--cian); box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4), 0 0 0 3px rgba(127, 243, 230, 0.14); }
+  .campo input.mal, .barra.mal input { border-color: #ff6b5e; }
+  .barra { display: flex; gap: 0.5rem; }
+  .barra input { flex: 1; min-width: 0; border-radius: 999px; padding-left: 1.2rem; }
+  .barra .gel { flex: none; padding: 0 1.3rem; }
+  .trampa { position: absolute; left: -9999px; opacity: 0; pointer-events: none; }
+  .estado { min-height: 1.5em; font-size: 13px; margin: 0.7rem 0 0; }
+  .estado.ok { color: var(--cian); }
+  .estado.error { color: #ff9b90; }
+  .estado a { border-bottom: 1px solid currentColor; }
+  .cartel { width: 100%; max-width: 320px; height: auto; display: block; margin: 0 auto 1.4rem; border-radius: 6px; }
+  .cartel[hidden], [hidden] { display: none !important; }
+
+  /* ---------- trabajo ---------- */
+  .discos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.6rem 0.9rem; }
+  .disco img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block; border-radius: 4px; margin-bottom: 0.7rem; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); transition: transform 0.4s, box-shadow 0.4s; }
+  .disco a:hover img { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--filo); }
+  .disco .titulo { display: block; font-size: 13px; font-weight: 400; line-height: 1.35; }
+  .disco .detalle { display: block; font-size: 10.5px; line-height: 1.55; color: var(--hueso-suave); letter-spacing: 0.04em; margin-top: 0.2rem; }
+
+  /* ---------- juegos ---------- */
+  .maquinas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.7rem; }
+  .maquinas button {
+    text-align: left; cursor: pointer; font: inherit; color: var(--hueso);
+    padding: 0.95rem 1rem; border-radius: 14px; border: 1px solid var(--filo);
+    background: linear-gradient(180deg, rgba(127, 243, 230, 0.09), rgba(0, 0, 0, 0.2));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12); transition: transform 0.25s, border-color 0.25s;
+  }
+  .maquinas button:hover { transform: translateY(-2px); border-color: var(--cian); }
+  .maquinas b { display: block; font-size: 12px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; }
+  .maquinas span { display: block; font-size: 11.5px; line-height: 1.4; color: var(--hueso-suave); margin-top: 0.25rem; }
+  .maquinas em { display: block; font-style: normal; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--naranja); margin-top: 0.45rem; }
+
+  /* sala de juegos: una capa encima de todo */
+  #sala { position: fixed; inset: 0; z-index: 20; overflow-y: auto; padding: 4.2rem 0.8rem 2rem; background: rgba(1, 7, 10, 0.9); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); text-align: center; }
+  #sala-cerrar { position: fixed; top: calc(0.9rem + env(safe-area-inset-top)); right: 1rem; z-index: 21; width: 44px; height: 44px; border-radius: 50%; padding: 0; letter-spacing: 0; font-size: 15px; }
+  #sala h2 { font-size: 22px; margin-bottom: 1.2rem; }
+  .abierta-sala { overflow: hidden; }
+  /* estilos de los juegos (js/*.js): los mismos de la home */
+  #juego-container { margin: 0 auto; }
+  #juego-container canvas { display: block; margin: 0 auto; border: 1px solid var(--linea); touch-action: none; max-width: 100%; }
+  .juego-hud { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--tinta-suave); margin: 1rem 0; }
+
+  /* solitario (DOM) */
+  .sol-mesa { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; max-width: 560px; margin: 0 auto; }
+  .sol-fila-top { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 8px; }
+  .sol-pila { min-height: 78px; position: relative; }
+  .sol-carta {
+    width: 100%;
+    aspect-ratio: 5 / 7;
+    border-radius: 4px;
+    background: #f7f4ea;
+    color: #1e2620;
+    font-size: clamp(10px, 2.6vw, 15px);
+    line-height: 1.1;
+    text-align: left;
+    padding: 3px 4px;
+    border: 1px solid rgba(0,0,0,0.25);
+    cursor: pointer;
+    user-select: none;
+    box-sizing: border-box;
+  }
+  .sol-carta.roja { color: #c22; }
+  .sol-carta.abajo { background: repeating-linear-gradient(45deg, #5b8a70, #5b8a70 4px, #4d7a61 4px, #4d7a61 8px); color: transparent; }
+  .sol-carta.sel { outline: 2px solid #ffd76a; }
+  .sol-hueco { border: 1px dashed var(--linea); border-radius: 4px; aspect-ratio: 5 / 7; cursor: pointer; }
+  .sol-tab .sol-carta { position: absolute; left: 0; right: 0; }
+
+  /* ---------- beats (drum machine + teclado + secuenciador) ---------- */
+  .bt-panel { max-width: 560px; margin: 0 auto; text-align: center; }
+  .bt-fila { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin: 0.8rem 0; align-items: center; }
+  .bt-fila label { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--tinta-suave); }
+  .bt-btn {
+    background: none; border: 1px solid var(--linea); color: var(--tinta);
+    font: inherit; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+    padding: 0.5rem 0.9rem; cursor: pointer;
+  }
+  .bt-btn.activo, .bt-btn:hover { border-color: var(--tinta); }
+  .bt-btn.tocando { background: var(--tinta); color: #333; }
+
+  .bt-grid { display: grid; grid-template-columns: 52px repeat(16, 1fr); gap: 2px; margin: 1rem 0; }
+  .bt-grid .bt-nombre { font-size: 9px; text-transform: uppercase; color: var(--tinta-suave); align-self: center; text-align: right; padding-right: 6px; }
+  .bt-celda {
+    aspect-ratio: 1; border: 1px solid var(--linea); background: none; cursor: pointer; padding: 0;
+    min-width: 0;
+  }
+  .bt-celda:nth-of-type(4n+1) { border-color: var(--tinta-suave); }  /* marca cada tiempo */
+  .bt-celda.on { background: var(--tinta); }
+  .bt-celda.ahora { outline: 2px solid #ffd76a; z-index: 1; }
+
+  .bt-teclado { display: flex; justify-content: center; position: relative; height: 110px; margin: 1rem 0; }
+  .bt-tecla { width: 34px; height: 100%; background: #f2efe6; border: 1px solid #555; cursor: pointer; position: relative; }
+  .bt-tecla.negra { width: 22px; height: 60%; background: #222; margin: 0 -11px; z-index: 2; }
+  .bt-tecla.presionada { background: #ffd76a; }
+  .bt-tecla span { position: absolute; bottom: 4px; left: 0; right: 0; font-size: 8px; color: #666; text-align: center; }
+  .bt-tecla.negra span { color: #999; }
+
+  .bt-fx { display: flex; gap: 1.2rem; justify-content: center; flex-wrap: wrap; margin: 1rem 0; }
+  .bt-fx label { display: flex; flex-direction: column; font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--tinta-suave); gap: 4px; }
+  .bt-fx input[type=range] { width: 90px; accent-color: var(--tinta); }
+
+  .bt-arreglo { display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px; margin: 1rem 0; }
+  .bt-compas {
+    aspect-ratio: 1; border: 1px solid var(--linea); background: none; color: var(--tinta);
+    font: inherit; font-size: 11px; cursor: pointer; padding: 0;
+  }
+  .bt-compas.ahora { outline: 2px solid #ffd76a; }
+
+  /* ---------- beats: capa M01 (doble pantalla DSi) ---------- */
+  .m01 { max-width: 640px; }
+  .m01-top {
+    border: 1px solid var(--linea);
+    padding: 0.8rem 0.5rem;
+    margin-bottom: 0.6rem;
+  }
+  .m01-cuerpo {
+    border: 1px solid var(--linea);
+    padding: 0.8rem 0.5rem;
+    min-height: 220px;
+  }
+  .m01-tracks .bt-btn { font-size: 9px; padding: 0.4rem 0.6rem; }
+  .bt-num { width: 56px; background: none; border: 1px solid var(--linea); color: inherit; font: inherit; padding: 2px 4px; }
+  .bt-select { background: none; border: 1px solid var(--linea); color: inherit; font: inherit; font-size: 10px; padding: 3px; }
+  .bt-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .bt-scroll .bt-grid { min-width: 100%; width: max-content; }
+  .bt-grid .bt-celda { min-width: 16px; min-height: 16px; }
+  .roll .bt-nombre { font-size: 8px; }
+  .roll .bt-celda { aspect-ratio: auto; height: 14px; }
+  .roll-celda.sombra { background: rgba(0,0,0,0.15); }
+  .roll-celda.on { background: #ffd76a; }
+  .roll-negra { opacity: 0.6; }
+  .m01-mixfila { justify-content: center; border-bottom: 1px solid var(--linea); padding-bottom: 0.5rem; }
+  .m01-kaoss {
+    position: relative;
+    width: min(300px, 80vw);
+    aspect-ratio: 1;
+    margin: 0 auto;
+    border: 1px solid var(--tinta);
+    background: repeating-linear-gradient(0deg, transparent 0 24px, var(--linea) 24px 25px),
+                repeating-linear-gradient(90deg, transparent 0 24px, var(--linea) 24px 25px);
+    touch-action: none;
+    cursor: crosshair;
+  }
+  .m01-kaoss-punto {
+    position: absolute;
+    left: 50%; top: 50%;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #ffd76a;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  /* ---------- fondo ---------- */
+  .tocaste { min-height: 82vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: center; padding: 6vh 1.5rem 9rem; }
+  .tocaste .cota { margin-bottom: 0.5rem; }
+  .tocaste p { font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--hueso-suave); }
+  .tocaste .gel { margin-top: 1.6rem; }
+
+  /* ---------- pantallas anchas: reliquia a un lado, panel al otro ---------- */
+  @media (min-width: 900px) {
+    .zona { display: grid; grid-template-columns: 1fr minmax(0, 580px); align-items: start; gap: 2.5rem; margin-bottom: 24vh; }
+    .zona:nth-of-type(even) .reliquia { order: 2; }
+    .zona:nth-of-type(even) { grid-template-columns: minmax(0, 580px) 1fr; }
+    /* la reliquia se queda a la vista mientras se lee su panel */
+    .reliquia { height: min(62vh, 480px); position: sticky; top: calc(50vh - min(31vh, 240px)); }
+    /* aquí sí hay vidrio de verdad: el panel desenfoca el agua que tiene detrás */
+    .panel { margin: 0; padding: 2.8rem 2.4rem 2.5rem; background: linear-gradient(180deg, rgba(10, 40, 48, 0.56), rgba(2, 12, 16, 0.74)); -webkit-backdrop-filter: blur(16px) saturate(1.35); backdrop-filter: blur(16px) saturate(1.35); }
+    .discos { grid-template-columns: repeat(3, 1fr); }
+    .consola a { padding: 1rem 0.9rem; font-size: 10.5px; letter-spacing: 0.2em; }
+    .hud-der { right: 2.2rem; } .sonda { right: 1rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .logo, .desciende::after { animation: none; }
+    .js .panel { opacity: 1; transform: none; transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="agua" aria-hidden="true"></canvas>
+
+<!-- instrumentos: profundidad, presión y temperatura cambian al bajar -->
+<div class="velo arriba" aria-hidden="true"></div><div class="velo abajo" aria-hidden="true"></div>
+<div class="hud hud-izq"><a href="#inicio" aria-label="Volver a la superficie">Saudaji ↑</a><span aria-hidden="true">19°26′N 99°08′O</span><button id="sonido" type="button" aria-pressed="false">sonido</button></div>
+<div class="hud hud-der" aria-hidden="true"><b id="hud-m">0000</b> m<br><span id="hud-datos">1 atm · 22 °C</span></div>
+<div class="hud sonda" aria-hidden="true"><i id="sonda-marca"></i></div>
+
+<header class="superficie" id="inicio">
+  <h1><img class="logo" src="assets/logo.svg" alt="Saudaji"></h1>
+  <p class="lema">Proyecto solista de Santiago Tejeda. Neofolk y pop alternativo desde Ciudad de México.</p>
+  <a class="gel" href="#escuchar">Escuchar</a>
+  <a class="desciende" href="#escuchar">desciende</a>
+</header>
+
+<main>
+
+<!-- ESCUCHAR -->
+<section class="zona" id="escuchar">
+  <div class="reliquia" data-obj="disco" aria-hidden="true"><span class="rotulo">obj. 01 — disco · <b>gíralo</b></span></div>
+  <div class="panel">
+    <p class="cota" data-cota>— 0040 m</p>
+    <h2>Escuchar</h2>
+    <iframe class="reproductor" id="reproductor" title="Reproductor de Spotify" loading="lazy"
+      src="https://open.spotify.com/embed/track/0Ie6N45MynD1bqge5C9tt6?utm_source=generator&amp;theme=0"
+      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+    <div class="plataformas" id="plataformas">
+      <a class="gel chico" data-p="sp" href="https://open.spotify.com/track/0Ie6N45MynD1bqge5C9tt6" target="_blank" rel="noopener">Spotify</a>
+      <a class="gel vidrio chico" data-p="ap" href="https://music.apple.com/mx/album/no-me-quiero-ir-single/6814931922" target="_blank" rel="noopener">Apple Music</a>
+      <a class="gel vidrio chico" data-p="yt" href="https://music.youtube.com/playlist?list=OLAK5uy_lyE1l6if4-7RD_e9rDXpFCLaaEtqX61So" target="_blank" rel="noopener">YouTube Music</a>
+      <a class="gel vidrio chico" data-p="dz" href="https://www.deezer.com/album/1102368232" target="_blank" rel="noopener">Deezer</a>
+    </div>
+    <!-- del más nuevo al más viejo. data-sp = lo que va después de open.spotify.com/ ; si falta una plataforma, no pongas su data- -->
+    <ul class="pistas" id="pistas">
+      <li><button class="pista" aria-current="true" data-sp="track/0Ie6N45MynD1bqge5C9tt6" data-ap="https://music.apple.com/mx/album/no-me-quiero-ir-single/6814931922" data-yt="https://music.youtube.com/playlist?list=OLAK5uy_lyE1l6if4-7RD_e9rDXpFCLaaEtqX61So" data-dz="https://www.deezer.com/album/1102368232">
+        <img src="assets/covers/no-me-quiero-ir.webp" alt="" loading="lazy"><span><span class="tit">(no) me quiero ir</span><span class="det">Sencillo · 2026</span></span><i class="luz"></i></button></li>
+      <li><button class="pista" data-sp="track/1QowIWD9UsgEoXF8FMUg1Y" data-ap="https://music.apple.com/mx/album/mucho-single/6803281026" data-dz="https://www.deezer.com/album/1058446352">
+        <img src="assets/covers/mucho-mas.webp" alt="" loading="lazy"><span><span class="tit">mucho +</span><span class="det">Sencillo · 2026</span></span><i class="luz"></i></button></li>
+      <li><button class="pista" data-sp="album/1kG111eh5jam65UXGxneAT" data-ap="https://music.apple.com/mx/album/ep/6770153862" data-yt="https://music.youtube.com/browse/MPREb_FW7lDiCJIud" data-dz="https://www.deezer.com/album/981466691">
+        <img src="assets/covers/sol-mano-sonrisa.webp" alt="" loading="lazy"><span><span class="tit">☼︎ ☞︎ ☺︎</span><span class="det">EP · 2025</span></span><i class="luz"></i></button></li>
+      <li><button class="pista" data-sp="album/1wuObFqZETqpSlS1EBWMwU" data-ap="https://music.apple.com/mx/album/ruido-single/1819153022" data-yt="https://music.youtube.com/playlist?list=OLAK5uy_m26mTlYcCFb9bCmwH3PIyiqRVGtEKbae4">
+        <img src="assets/covers/ruido.webp" alt="" loading="lazy"><span><span class="tit">RUIDO</span><span class="det">Sencillo · 2025</span></span><i class="luz"></i></button></li>
+      <li><button class="pista" data-sp="album/1RJ6oxpf6dLtcOiRllG1Wu" data-ap="https://music.apple.com/us/album/tormenta-callada-ep/1786832522" data-yt="https://music.youtube.com/playlist?list=OLAK5uy_kHud9VU39s14ErTsns1RsWyjXz8HHqM-w">
+        <img src="assets/covers/tormenta-callada.webp" alt="" loading="lazy"><span><span class="tit">tormenta, Callada</span><span class="det">EP · 2024</span></span><i class="luz"></i></button></li>
+    </ul>
+    <div class="enlaces">
+      <a class="enlace" href="escucha.html">Más plataformas</a>
+      <a class="enlace" data-link="bandcamp" href="https://saudaji.bandcamp.com/album/-" target="_blank" rel="noopener">Bandcamp</a>
+      <a class="enlace" data-link="soundcloud" href="https://soundcloud.com/santiiiiiiiii" target="_blank" rel="noopener">SoundCloud</a>
+    </div>
+  </div>
+</section>
+
+<!-- BIO -->
+<section class="zona" id="bio">
+  <div class="reliquia" data-obj="sombrero" aria-hidden="true"><span class="rotulo">obj. 02 — sombrero</span></div>
+  <div class="panel">
+    <p class="cota" data-cota>— 0300 m</p>
+    <h2>Bio</h2>
+    <!-- respaldo: el script lo reemplaza con content.json -->
+    <div id="bio-texto">
+      <p>Saudaji es el proyecto solista de Santiago Tejeda — productor, compositor, ingeniero de audio y diseñador con base en Ciudad de México. Hace música desde los 18 años y se mueve entre el neofolk, el pop alternativo y las texturas orgánicas, buscando siempre otras formas de producir y componer: canciones que suenan a cuarto, a campo y a máquina al mismo tiempo.</p>
+      <p>Como solista ha publicado los EPs «tormenta, Callada» (2024) y «☼ ☞ ☺» (2025), además del sencillo «RUIDO» (2025), todos producidos, grabados y mezclados por él mismo bajo una ética DIY. Su música retrata la ansiedad y la belleza de lo cotidiano con un enfoque honesto y artesanal.</p>
+      <p>Fuera de su proyecto es productor e ingeniero de audio, y socio y dueño de Sagredo Estudio, donde ha colaborado con artistas clave de la escena alternativa mexicana como Wet Baes, ALONG y Los Milagro. Ha tocado en más de la mitad del país y en Los Ángeles, consolidándose como parte de la nueva ola del pop independiente mexicano.</p>
+    </div>
+    <ul class="highlights" id="highlights">
+      <li>Productor, compositor e ingeniero de audio. Socio y dueño de Sagredo Estudio en CDMX.</li>
+      <li>Shows y colaboraciones con Los Milagro, ALONG, Wet Baes, Daniel Quién y BAM BAM ATOM., entre otros.</li>
+      <li>Grabaciones con ALONG, Ivana, Doris Anahí, Rafa Arreguín, Fer Altuzar, Ahora Juntos, Disco Bahía y Enzo Marcelo, entre otros.</li>
+      <li>Producciones para ALONG, Fer Altuzar, BAM BAM ATOM., Doris Anahí y Ramona Vee, entre otros.</li>
+      <li>Presencia en Ibero 90.9 · presentaciones en México y Los Ángeles.</li>
+    </ul>
+    <div class="botones">
+      <a class="gel vidrio chico" href="presskit.html">Press kit</a>
+      <a class="gel vidrio chico" href="rider.html">Rider técnico</a>
+    </div>
+  </div>
+</section>
+
+<!-- FECHAS: sale del bloque "evento" de content.json, igual que concierto.html -->
+<section class="zona" id="fechas">
+  <div class="reliquia" data-obj="herradura" aria-hidden="true"><span class="rotulo">obj. 03 — herradura</span></div>
+  <div class="panel">
+    <p class="cota" data-cota>— 0700 m</p>
+    <h2 id="ev-titulo">Fechas</h2>
+    <img id="ev-cartel" class="cartel" alt="Cartel del concierto" hidden>
+    <p id="ev-detalle" hidden></p>
+    <p id="ev-texto">Próximas fechas pronto. Pon tu email y te aviso primero.</p>
+    <div class="botones" id="ev-boton" hidden><a class="gel" href="concierto.html">Registro</a></div>
+    <form id="form-fechas" novalidate>
+      <div class="barra">
+        <input id="ff-email" type="email" required autocomplete="email" inputmode="email" placeholder="tu@correo.com" aria-label="Tu correo">
+        <button class="gel chico" type="submit">Avísame</button>
+      </div>
+      <input class="trampa" type="text" name="sitio_web" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <p class="estado" role="status" aria-live="polite"></p>
+    </form>
+    <p class="nota">Tus datos solo se usan para avisarte de este proyecto. Cero spam.</p>
+  </div>
+</section>
+
+<!-- TRABAJO: sale del portafolio de content.json -->
+<section class="zona" id="trabajo">
+  <div class="reliquia" data-obj="estrella" aria-hidden="true"><span class="rotulo">obj. 04 — estrella</span></div>
+  <div class="panel">
+    <p class="cota" data-cota>— 1100 m</p>
+    <h2>Trabajo</h2>
+    <p>Producción, mezcla y composición para otros artistas, desde Sagredo Estudio.</p>
+    <!-- respaldo: el script lo reemplaza con el portafolio de content.json -->
+    <div class="discos" id="trabajo-grid">
+      <div class="disco"><a href="https://music.apple.com/us/album/bam-bam-atom-ep/1687196212" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/05/fe/5a/05fe5a99-40b6-025a-b900-b82807c8d049/artwork.jpg/600x600bb.jpg" alt="BAM BAM ATOM. — BAM BAM ATOM." loading="lazy"></a><span class="titulo">BAM BAM ATOM.</span><span class="detalle">BAM BAM ATOM.<br>Producción · Composición · 2023</span></div>
+      <div class="disco"><a href="https://music.apple.com/us/album/feel-the-groove-single/1721766961" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/4c/2f/4e/4c2f4e41-b5a0-8ee3-1f65-19fd3be7b26d/artwork.jpg/600x600bb.jpg" alt="FEEL the GROOVE. — BAM BAM ATOM." loading="lazy"></a><span class="titulo">FEEL the GROOVE.</span><span class="detalle">BAM BAM ATOM.<br>Producción · Mezcla · Composición · 2024</span></div>
+      <div class="disco"><a href="https://music.apple.com/us/album/eternidad-single/1837010916" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/66/62/89/666289e5-361c-6d18-7f5f-b861cb7ee5b0/0.jpg/600x600bb.jpg" alt="Eternidad — Fer Altuzar" loading="lazy"></a><span class="titulo">Eternidad</span><span class="detalle">Fer Altuzar<br>Producción · Composición · 2025</span></div>
+      <div class="disco"><a href="https://music.apple.com/us/album/por-las-buenas/1718253305" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/9b/65/70/9b657079-71ef-6bcb-0fa2-3c738c8ca85e/8447053031735.jpg/600x600bb.jpg" alt="Por Las Buenas — EP — Doris Anahí" loading="lazy"></a><span class="titulo">Por Las Buenas — EP</span><span class="detalle">Doris Anahí<br>Co-producción con Wet Baes (Por Las Buenas, Let It Die) · Producción (Before I Go) · Composición en los tres temas · 2023</span></div>
+      <div class="disco"><a href="https://music.apple.com/us/album/1896109578" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/88/68/78/886878a6-2a74-322e-0186-5fe255b40eaf/artwork.jpg/600x600bb.jpg" alt="MAGAMUNDI — ALONG" loading="lazy"></a><span class="titulo">MAGAMUNDI</span><span class="detalle">ALONG<br>Producción · Mezcla · Composición · 2026</span></div>
+      <div class="disco"><a href="https://music.apple.com/us/album/corto-plazo/6769809077" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/45/28/d3/4528d3bb-9dc6-31ae-7f56-89c7390e23e2/824296638019_cover.jpg/600x600bb.jpg" alt="Corto Plazo — FAVZTO" loading="lazy"></a><span class="titulo">Corto Plazo</span><span class="detalle">FAVZTO<br>Producción · Mezcla · Masterización · 2026</span></div>
+      <div class="disco"><img src="assets/covers/persona.jpg" alt="Qué costumbre tan salvaje / DOOMINACIÓN — PERSONA" loading="lazy"><span class="titulo">Qué costumbre tan salvaje / DOOMINACIÓN</span><span class="detalle">PERSONA<br>Producción · Mezcla · Masterización · Composición · 2026</span></div>
+      <div class="disco"><a href="https://music.apple.com/mx/album/la-flor/6824664212?i=6824664429" target="_blank" rel="noopener"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/71/1a/bb/711abb51-67f7-746f-8688-d4f3e4ec2fb8/823375545217_Cover.jpg/600x600bb.jpg" alt="La flor — Tuzeint &amp; Saudaji" loading="lazy"></a><span class="titulo">La flor</span><span class="detalle">Tuzeint &amp; Saudaji<br>Producción · Composición · 2026</span></div>
+    </div>
+    <div class="botones"><a class="gel vidrio chico" href="#contacto">¿Produzco lo tuyo?</a></div>
+  </div>
+</section>
+
+<!-- JUEGOS -->
+<section class="zona" id="juegos">
+  <div class="reliquia" data-obj="dado" aria-hidden="true"><span class="rotulo">obj. 05 — dado</span></div>
+  <div class="panel">
+    <p class="cota" data-cota>— 1500 m</p>
+    <h2>Juegos</h2>
+    <div class="maquinas" id="maquinas">
+      <button data-juego="snake"><b>Snake</b><span>La víbora clásica: come, crece y no te muerdas la cola.</span><em>récord <i data-hs="snake">0</i></em></button>
+      <button data-juego="invaders"><b>Invaders</b><span>Marcianitos: tumba las oleadas antes de que te alcancen.</span><em>récord <i data-hs="invaders">0</i></em></button>
+      <button data-juego="solitario"><b>Solitario</b><span>Klondike de toda la vida. Toca una carta y luego su destino.</span><em>victorias <i data-hs="solitario">0</i></em></button>
+      <button data-juego="beats"><b>Beats</b><span>Caja de ritmos y sinte: haz una rola de 32 compases.</span><em>estudio de bolsillo</em></button>
+    </div>
+    <div class="botones">
+      <button class="gel vidrio chico" id="espejo" type="button" aria-pressed="false">Modo espejo</button>
+      <a class="gel vidrio chico" href="https://saudaji.github.io/flipnote-filter/" target="_blank" rel="noopener noreferrer">Flip</a>
+    </div>
+    <p class="nota" style="margin-top:1rem">Modo espejo usa tu cámara para meterte al agua. Nada se graba ni se sube.</p>
+  </div>
+</section>
+
+<!-- CONTACTO -->
+<section class="zona" id="contacto">
+  <div class="reliquia" data-obj="botella" aria-hidden="true"><span class="rotulo">obj. 06 — mensaje</span></div>
+  <div class="panel">
+    <p class="cota" data-cota>— 1900 m</p>
+    <h2>Contacto</h2>
+    <p>¿Buscas producción, mezcla o composición para tu proyecto? Manda tu mensaje.</p>
+    <!-- mismo formulario de Google que la home: los valores de los <select> deben ser idénticos a los de allá -->
+    <form id="form-contacto" novalidate>
+      <div class="campo"><label for="fc-nombre">Nombre *</label><input id="fc-nombre" type="text" required autocomplete="name"></div>
+      <div class="campo"><label for="fc-tipo">Tipo de proyecto</label>
+        <select id="fc-tipo"><option value="Producción">Producción</option><option value="Mix">Mix</option><option value="Master">Master</option><option value="Composición">Composición</option></select></div>
+      <div class="campo"><label for="fc-rolas">¿Cuántas canciones?</label>
+        <select id="fc-rolas"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="Albúm o EP">Álbum o EP</option></select></div>
+      <div class="campo"><label for="fc-tel">Número (teléfono)</label><input id="fc-tel" type="tel" inputmode="tel" placeholder="+52 ..." autocomplete="tel"></div>
+      <div class="campo"><label for="fc-email">Correo *</label><input id="fc-email" type="email" required autocomplete="email"></div>
+      <input class="trampa" type="text" name="sitio_web" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <p class="estado" role="status" aria-live="polite"></p>
+      <button class="gel" type="submit">Enviar</button>
+    </form>
+    <div class="enlaces">
+      <a class="enlace mail" href="mailto:saudaji@saudaji.com" style="text-transform:none;letter-spacing:0.12em;font-size:13px">saudaji@saudaji.com</a>
+    </div>
+    <div class="enlaces">
+      <a class="enlace" data-link="instagram" href="https://www.instagram.com/_saudaji" target="_blank" rel="noopener">Instagram</a>
+      <a class="enlace" data-link="tiktok" href="https://www.tiktok.com/@saudaji_" target="_blank" rel="noopener">TikTok</a>
+      <a class="enlace" data-link="x" href="https://x.com/saudaji_" target="_blank" rel="noopener">X</a>
+      <a class="enlace" data-link="spotify" href="https://open.spotify.com/artist/1Y9oaq7o6sWlP4YKM9ohu9" target="_blank" rel="noopener">Spotify</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="tocaste">
+  <p class="cota">— 2000 m</p>
+  <p>Tocaste fondo · aquí hubo un lago</p>
+  <p style="margin-top:0.4rem">© 2026 Saudaji</p>
+  <a class="gel vidrio chico" href="#inicio">Volver a la superficie</a>
+</footer>
+
+<nav class="consola" aria-label="Secciones">
+  <a href="#escuchar">Escuchar</a>
+  <a href="#bio">Bio</a>
+  <a href="#fechas">Fechas</a>
+  <a href="#trabajo">Trabajo</a>
+  <a href="#juegos">Juegos</a>
+  <a href="#contacto">Contacto</a>
+</nav>
+
+<div id="sala" hidden>
+  <button class="gel vidrio" id="sala-cerrar" aria-label="Cerrar el juego">✕</button>
+  <h2 id="sala-titulo">Juego</h2>
+  <div id="juego-container"></div>
+</div>
+
+<script>
+/* entrada de los paneles. Va aparte del módulo de abajo: si el 3D no carga, el contenido aparece igual. */
+(function () {
+  document.documentElement.classList.add('js');
+  var paneles = document.querySelectorAll('.panel');
+  if (!('IntersectionObserver' in window)) { for (var i = 0; i < paneles.length; i++) paneles[i].classList.add('visto'); return; }
+  var ojo = new IntersectionObserver(function (es) {
+    es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('visto'); ojo.unobserve(e.target); } });
+  }, { rootMargin: '0px 0px -12% 0px' });
+  for (var j = 0; j < paneles.length; j++) ojo.observe(paneles[j]);
+})();
+</script>
+
+<script type="module">
+import { iniciar } from './js/abismo.js';
+
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const CORREO_OK = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const reducir = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- la escena ---------- */
+const PROF_MAX = 2000;                                   // metros en el fondo
+const hudM = $('#hud-m'), hudDatos = $('#hud-datos'), marca = $('#sonda-marca');
+let metrosAnt = -1, profActual = 0;
+function instrumentos(prof) {
+  const m = Math.round(prof * PROF_MAX);
+  if (m === metrosAnt) return;
+  metrosAnt = m; profActual = prof;
+  if (mar && sonando) mar.filtro.frequency.setTargetAtTime(950 - 650 * prof, mar.ctx.currentTime, 0.6);   // más hondo, más sordo
+  hudM.textContent = String(m).padStart(4, '0');
+  // presión: 1 atm cada 10 m. temperatura: de 22 °C arriba a 2 °C en el fondo
+  hudDatos.textContent = (1 + Math.round(m / 10)) + ' atm · ' + Math.round(22 - 20 * Math.pow(prof, 0.6)) + ' °C';
+  marca.style.top = (prof * 100).toFixed(2) + '%';
+  document.body.classList.toggle('bajo', prof > 0.03);
+}
+
+let escena = null;
+function arranca(fotos) {
+  escena = iniciar($('#agua'), {
+    reliquias: $$('.reliquia').map((el) => ({ el, tipo: el.dataset.obj })),
+    fotos: { base: 'assets/fuji/', lista: fotos },
+    reducir,
+    alCuadro: instrumentos,
+    alTocar: gota,
+    alEmpezar: () => $('#agua').classList.add('lista'),
+  });
+  if (!escena) {                                         // sin WebGL: instrumentos con el scroll normal
+    document.documentElement.classList.add('sin-3d');
+    const sinEscena = () => instrumentos(Math.min(1, scrollY / Math.max(1, document.documentElement.scrollHeight - innerHeight)));
+    addEventListener('scroll', sinEscena, { passive: true }); sinEscena();
+  }
+}
+// las fotos que flotan salen del mismo manifiesto que el collage de la home
+fetch('assets/fuji/manifest.json').then((r) => (r.ok ? r.json() : [])).catch(() => []).then(arranca);
+
+// tocar el agua (no un botón ni un panel) suelta burbujas
+document.addEventListener('click', (e) => {
+  if (!escena || e.target.closest('a, button, input, select, label, iframe, .panel, .reliquia, .consola, #sala')) return;
+  escena.burbujas(e.clientX, e.clientY, 10);
+  gota();
+});
+
+/* ---------- sonido: un mar hecho con osciladores, sin archivos. Apagado hasta que lo prendas ---------- */
+const btnSonido = $('#sonido');
+let mar = null, sonando = false, reloj = 0;
+function creaMar() {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return null;
+  const ctx = new AC();
+  const salida = ctx.createGain(); salida.gain.value = 0; salida.connect(ctx.destination);
+  const filtro = ctx.createBiquadFilter(); filtro.type = 'lowpass'; filtro.frequency.value = 950; filtro.connect(salida);
+  // el zumbido del fondo: voces graves apenas desafinadas entre sí (laten despacio)
+  [[55, 'sine', 0.5], [55.4, 'sine', 0.5], [110.3, 'triangle', 0.16], [164.8, 'sine', 0.07]].forEach(([f, tipo, g]) => {
+    const o = ctx.createOscillator(), gn = ctx.createGain();
+    o.type = tipo; o.frequency.value = f; gn.gain.value = g; o.connect(gn); gn.connect(filtro); o.start();
+  });
+  // el agua: ruido café con un filtro que respira
+  const n = ctx.sampleRate * 3, buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0, ult = 0; i < n; i++) { ult = (ult + 0.02 * (Math.random() * 2 - 1)) / 1.02; d[i] = ult * 3.5; }
+  const ruido = ctx.createBufferSource(), fr = ctx.createBiquadFilter(), gr = ctx.createGain(), lfo = ctx.createOscillator(), gl = ctx.createGain();
+  ruido.buffer = buf; ruido.loop = true; fr.type = 'lowpass'; fr.frequency.value = 480; gr.gain.value = 0.5;
+  lfo.frequency.value = 0.07; gl.gain.value = 220; lfo.connect(gl); gl.connect(fr.frequency);
+  ruido.connect(fr); fr.connect(gr); gr.connect(salida); ruido.start(); lfo.start();
+  // eco largo para los cantos lejanos
+  const eco = ctx.createDelay(1.5), ret = ctx.createGain(), ecoF = ctx.createBiquadFilter();
+  eco.delayTime.value = 0.47; ret.gain.value = 0.5; ecoF.type = 'lowpass'; ecoF.frequency.value = 1400;
+  eco.connect(ecoF); ecoF.connect(ret); ret.connect(eco); eco.connect(salida);
+  return { ctx, salida, filtro, eco };
+}
+function canto() {                                          // algo canta a lo lejos, cada tanto
+  if (!mar || !sonando) return;
+  const { ctx, eco, salida } = mar, t0 = ctx.currentTime, notas = [196, 220, 261.6, 293.7, 392];
+  const f = notas[Math.floor(Math.random() * notas.length)] * (profActual > 0.5 ? 0.5 : 1);
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = 'sine'; o.frequency.setValueAtTime(f, t0); o.frequency.exponentialRampToValueAtTime(f * (0.94 + Math.random() * 0.14), t0 + 2.6);
+  g.gain.setValueAtTime(0.0001, t0); g.gain.linearRampToValueAtTime(0.10, t0 + 0.5); g.gain.exponentialRampToValueAtTime(0.0008, t0 + 3.2);
+  o.connect(g); g.connect(eco); g.connect(salida); o.start(t0); o.stop(t0 + 3.4);
+  reloj = setTimeout(canto, 7000 + Math.random() * 9000);
+}
+function gota() {                                           // una burbuja
+  if (!mar || !sonando) return;
+  const { ctx, salida } = mar, t0 = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain(), f = 260 + Math.random() * 160;
+  o.type = 'sine'; o.frequency.setValueAtTime(f, t0); o.frequency.exponentialRampToValueAtTime(f * 3.2, t0 + 0.09);
+  g.gain.setValueAtTime(0.0001, t0); g.gain.linearRampToValueAtTime(0.09, t0 + 0.012); g.gain.exponentialRampToValueAtTime(0.0008, t0 + 0.13);
+  o.connect(g); g.connect(salida); o.start(t0); o.stop(t0 + 0.15);
+}
+function sonido(si) {
+  if (si && !mar) mar = creaMar();
+  if (!mar) { btnSonido.hidden = true; return; }
+  sonando = si; clearTimeout(reloj);
+  const t0 = mar.ctx.currentTime;
+  mar.salida.gain.cancelScheduledValues(t0);
+  mar.salida.gain.setTargetAtTime(si ? 0.5 : 0, t0, si ? 0.9 : 0.15);
+  if (si) { mar.ctx.resume(); reloj = setTimeout(canto, 2500); } else setTimeout(() => { if (!sonando) mar.ctx.suspend(); }, 900);
+  btnSonido.setAttribute('aria-pressed', si ? 'true' : 'false');
+}
+btnSonido.addEventListener('click', () => sonido(!sonando));
+document.addEventListener('visibilitychange', () => { if (mar && sonando) (document.hidden ? mar.ctx.suspend() : mar.ctx.resume()); });
+
+/* ---------- cotas de profundidad y menú: se calculan con la posición real de cada zona ---------- */
+const zonas = $$('.zona'), linksConsola = $$('.consola a');
+function cotas() {
+  const total = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+  zonas.forEach((z) => {
+    const m = Math.min(PROF_MAX, Math.round((z.getBoundingClientRect().top + scrollY) / total * PROF_MAX / 10) * 10);
+    const c = $('[data-cota]', z);
+    if (c) c.textContent = '— ' + String(m).padStart(4, '0') + ' m';
+  });
+}
+addEventListener('load', cotas); addEventListener('resize', cotas);
+if ('IntersectionObserver' in window) {
+  const ojo = new IntersectionObserver((es) => es.forEach((en) => {
+    if (en.isIntersecting) linksConsola.forEach((a) => a.classList.toggle('aqui', a.getAttribute('href') === '#' + en.target.id));
+  }), { rootMargin: '-45% 0px -45% 0px' });
+  zonas.forEach((z) => ojo.observe(z));
+}
+
+/* ---------- escuchar: elegir un lanzamiento cambia el reproductor y los botones ---------- */
+const reproductor = $('#reproductor'), botonesP = $$('#plataformas [data-p]');
+$$('.pista').forEach((b) => b.addEventListener('click', () => {
+  $$('.pista').forEach((o) => o.setAttribute('aria-current', o === b ? 'true' : 'false'));
+  reproductor.src = 'https://open.spotify.com/embed/' + b.dataset.sp + '?utm_source=generator&theme=0';
+  botonesP.forEach((a) => {
+    const url = a.dataset.p === 'sp' ? 'https://open.spotify.com/' + b.dataset.sp : b.dataset[a.dataset.p];
+    a.hidden = !url;
+    if (url) a.href = url;
+  });
+}));
+
+/* ---------- contenido de content.json ---------- */
+function pintaTrabajo(lista) {
+  const grid = $('#trabajo-grid');
+  grid.innerHTML = '';
+  lista.forEach((pr) => {
+    const d = document.createElement('div'); d.className = 'disco';
+    const img = document.createElement('img');
+    img.src = pr.cover || ''; img.alt = pr.titulo + ' — ' + (pr.artista || ''); img.loading = 'lazy';
+    if (pr.link) { const a = document.createElement('a'); a.href = pr.link; a.target = '_blank'; a.rel = 'noopener'; a.append(img); d.append(a); } else d.append(img);
+    const t = document.createElement('span'); t.className = 'titulo'; t.textContent = pr.titulo;
+    const det = document.createElement('span'); det.className = 'detalle';
+    det.append(document.createTextNode(pr.artista || ''), document.createElement('br'), document.createTextNode(pr.rol + (pr.año ? ' · ' + pr.año : '')));
+    d.append(t, det); grid.append(d);
+  });
+}
+let correo = 'saudaji@saudaji.com';
+fetch('content.json', { cache: 'no-store' }).then((r) => { if (!r.ok) throw 0; return r.json(); }).then((c) => {
+  if (c.bio && c.bio.texto) {
+    const cont = $('#bio-texto'); cont.innerHTML = '';
+    c.bio.texto.split(/\n\s*\n/).forEach((parr) => { const p = document.createElement('p'); p.textContent = parr.trim(); cont.append(p); });
+  }
+  if (Array.isArray(c.highlights) && c.highlights.length) {
+    const hl = $('#highlights'); hl.innerHTML = '';
+    c.highlights.forEach((h) => { const li = document.createElement('li'); li.textContent = h; hl.append(li); });
+  }
+  if (Array.isArray(c.portafolio) && c.portafolio.length) pintaTrabajo(c.portafolio);
+  if (c.links) {
+    $$('a[data-link]').forEach((a) => { const u = c.links[a.dataset.link]; if (u) a.href = u; });
+    if (c.links.email) { correo = c.links.email; const m = $('.mail'); m.href = 'mailto:' + correo; m.textContent = correo; }
+  }
+  // fechas: con evento.fecha se anuncia el show; sin ella se queda «próximas fechas pronto» + correo
+  const e = c.evento || {};
+  if (e.fecha) {
+    $('#ev-titulo').textContent = e.titulo || 'Próximo concierto';
+    const det = $('#ev-detalle'); det.textContent = [e.fecha, e.lugar].filter(Boolean).join('  ·  '); det.hidden = false;
+    $('#ev-texto').textContent = e.registro_cerrado ? (e.mensaje_cerrado || 'El registro ya cerró.') : (e.texto || '');
+    if (e.cartel) { const k = $('#ev-cartel'); k.src = e.cartel; k.hidden = false; }
+    if (!e.registro_cerrado) { $('#ev-boton').hidden = false; if (e.cta) $('#ev-boton a').textContent = e.cta; }
+  } else if (e.sin_fecha_titulo) {
+    $('#ev-texto').textContent = e.sin_fecha_titulo + '. Pon tu email y te aviso primero.';
+  }
+}).catch(() => { /* sin content.json: se queda el respaldo del HTML */ }).then(cotas);
+
+/* ---------- formularios (van a los mismos Google Forms que la home y concierto.html) ---------- */
+function envia(url, campos) {
+  const cuerpo = new URLSearchParams();
+  Object.keys(campos).forEach((k) => cuerpo.append(k, campos[k]));
+  return fetch(url, { method: 'POST', mode: 'no-cors', body: cuerpo });      // Google no deja leer la respuesta: se asume éxito
+}
+const fallo = (estado) => { estado.className = 'estado error'; estado.innerHTML = 'No se pudo enviar. Escríbeme a <a href="mailto:' + correo + '">' + correo + '</a>'; };
+
+const formF = $('#form-fechas');
+formF.addEventListener('submit', (ev) => {
+  ev.preventDefault();
+  const estado = $('.estado', formF), email = $('#ff-email'), barra = $('.barra', formF);
+  if ($('.trampa', formF).value) return;                                    // honeypot
+  barra.classList.remove('mal'); estado.className = 'estado'; estado.textContent = '';
+  if (!CORREO_OK.test(email.value.trim())) { barra.classList.add('mal'); estado.className = 'estado error'; estado.textContent = 'Revisa tu correo.'; return; }
+  estado.textContent = 'Enviando…';
+  envia('https://docs.google.com/forms/d/e/1FAIpQLSdvE6pc-aFAAB2_KUZQ6OckhwvgNcRfJPtQabnTx4yDqzDtfQ/formResponse',
+    { 'entry.1050355688': 'FUTURAS', 'entry.1429887576': email.value.trim() })
+    .then(() => { estado.className = 'estado ok'; estado.textContent = 'Listo, te aviso primero de la próxima fecha.'; formF.reset(); })
+    .catch(() => fallo(estado));
+});
+
+const formC = $('#form-contacto');
+formC.addEventListener('submit', (ev) => {
+  ev.preventDefault();
+  const estado = $('.estado', formC), nombre = $('#fc-nombre'), email = $('#fc-email'), tel = $('#fc-tel');
+  if ($('.trampa', formC).value) return;
+  [nombre, email, tel].forEach((c) => c.classList.remove('mal'));
+  estado.className = 'estado'; estado.textContent = '';
+  let ok = true;
+  if (!nombre.value.trim()) { nombre.classList.add('mal'); ok = false; }
+  if (!CORREO_OK.test(email.value.trim())) { email.classList.add('mal'); ok = false; }
+  if (tel.value.trim() && !/^[+]?[\d\s\-().]{7,20}$/.test(tel.value.trim())) { tel.classList.add('mal'); ok = false; }
+  if (!ok) { estado.className = 'estado error'; estado.textContent = 'Revisa los campos marcados.'; return; }
+  estado.textContent = 'Enviando…';
+  envia('https://docs.google.com/forms/d/e/1FAIpQLSd8OuqQiFjTQKlK_TIUSTvsUt2bkCivpVJxvGK82OU3QKYg1g/formResponse', {
+    'entry.1152407059': nombre.value.trim(), 'entry.1843537593': $('#fc-tipo').value, 'entry.435474368': $('#fc-rolas').value,
+    'entry.401038771': tel.value.trim(), 'entry.176961981': email.value.trim(),
+  }).then(() => { estado.className = 'estado ok'; estado.textContent = '¡Enviado! Te contesto pronto.'; formC.reset(); })
+    .catch(() => fallo(estado));
+});
+
+/* ---------- juegos: se cargan hasta que se abren ---------- */
+const sala = $('#sala'), contJuego = $('#juego-container');
+let juego = null;
+function records() { $$('[data-hs]').forEach((el) => { try { el.textContent = localStorage.getItem('games.' + el.dataset.hs + '.highscore') || '0'; } catch (e) { /* sin almacenamiento */ } }); }
+function cierraSala() {
+  if (juego) { juego.destroy(); juego = null; }
+  contJuego.innerHTML = ''; sala.hidden = true; document.body.classList.remove('abierta-sala');
+  if (escena) escena.pausa(false);
+  records();
+}
+$$('#maquinas [data-juego]').forEach((b) => b.addEventListener('click', () => {
+  sala.hidden = false; document.body.classList.add('abierta-sala');
+  $('#sala-titulo').textContent = $('b', b).textContent;
+  if (escena) escena.pausa(true);                         // el juego se queda con todo el teléfono
+  import('./js/' + b.dataset.juego + '.js').then((m) => { juego = m.default; juego.init(contJuego); })
+    .catch((err) => { contJuego.textContent = 'No se pudo cargar el juego.'; console.error(err); });
+}));
+$('#sala-cerrar').addEventListener('click', cierraSala);
+addEventListener('keydown', (e) => { if (e.key === 'Escape' && !sala.hidden) cierraSala(); });
+records();
+
+/* ---------- modo espejo: tu cámara detrás del agua. Nada sale del teléfono ---------- */
+const btnEspejo = $('#espejo');
+let flujo = null, video = null;
+function apagaEspejo() {
+  if (flujo) { flujo.getTracks().forEach((p) => p.stop()); flujo = null; }
+  if (video) { video.remove(); video = null; }
+  if (escena) escena.agua(1);
+  btnEspejo.setAttribute('aria-pressed', 'false'); btnEspejo.textContent = 'Modo espejo';
+}
+if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) btnEspejo.hidden = true;
+btnEspejo.addEventListener('click', () => {
+  if (flujo) { apagaEspejo(); return; }
+  navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: { ideal: 'environment' } }, audio: false }).then((s) => {
+    flujo = s;
+    video = document.createElement('video');
+    video.id = 'espejo-video'; video.autoplay = true; video.muted = true; video.setAttribute('playsinline', '');
+    video.srcObject = s;
+    document.body.insertBefore(video, $('#agua'));          // debajo del agua
+    if (escena) escena.agua(0.62);
+    btnEspejo.setAttribute('aria-pressed', 'true'); btnEspejo.textContent = 'Apagar espejo';
+    s.getVideoTracks()[0].addEventListener('ended', apagaEspejo);
+  }).catch(() => { apagaEspejo(); btnEspejo.disabled = true; btnEspejo.textContent = 'Cámara no disponible'; });
+});
+addEventListener('pagehide', apagaEspejo);
+</script>
+
+</body>
+</html>
